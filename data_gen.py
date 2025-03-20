@@ -7,6 +7,7 @@ import itertools
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import json
 import setup
+import torch
 
 class Example():
     def __init__(self, word, name, definition):
@@ -34,10 +35,15 @@ def generate_examples(words):
             result.append({'word': syn, "word.token": word, "examples": examples, "definition": d})
     return result
                 
-    
+model_id = "meta-llama/Llama-3.3-70B-Instruct"
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
 model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
-pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer)
+pipeline = pipeline(
+    "text-generation",
+    model=model_id,
+    model_kwargs={"torch_dtype": torch.bfloat16},
+    device_map="auto",
+)
 nouns = set([n.name().split(".")[0] for n in list(wn.all_synsets('n'))][:10])
 # verbs = set([v.name().split(".")[0] for v in list(wn.all_synsets('v'))])
 with open("data.json", "a") as data_file:
