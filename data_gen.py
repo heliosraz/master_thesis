@@ -32,17 +32,17 @@ def generate_examples(words):
             
             example = Example(lemma.name(), syn, defn, sentence)
             prompt = format_example(example)
-            examples = [pipe(prompt)[0]["generated_text"] for _ in range(5)]
+            examples = [pipe(prompt)[0]["generated_text"][-1] for _ in range(5)]
             print(examples)
             result.append({'word': syn, "word.token": word, "examples": examples, "definition": defn})
     return result
                 
     
-tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B")
+model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.1-8B")
 pipe = pipeline(task="text-generation", model=model, tokenizer=tokenizer)
 nouns = set([n.name().split(".")[0] for n in list(wn.all_synsets('n'))][:10])
 # verbs = set([v.name().split(".")[0] for v in list(wn.all_synsets('v'))])
 with open("data.json", "a") as data_file:
-    json.dumps(generate_examples(nouns), fp=data_file, indent=4)
+    json.dump(generate_examples(nouns), fp=data_file, indent=4)
 # generate_examples(verbs[:10])
