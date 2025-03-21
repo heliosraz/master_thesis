@@ -4,7 +4,7 @@
 Replace the word [glass] that matches the meaning the closest:
 The man drank out of the [glass]. 
 A. window glass
-B. glass of water
+B. bottle
 C. Methamphetamine
 ...
 

@@ -16,10 +16,17 @@ def format_example(example:DataInstance, task:int):
     if task == 1:
         prompt = (f"How well does \"{example.definition}\" describe {example.word} in this sentence? \n"
                 f"Sentence: {example.example}")
+        # why does it fit?
+        # ask about the different words in the definition contribute to this word sense?
+        # ranking the senses for this word
+            # how well does this definition fit the word in this sentence?
     elif task == 2:
         prompt = (f"Which definition matches {example.word} in \"{example.example}\"?\n")
         for i, choice in enumerate(example.choices):
             prompt += f"{i}. {choice}\n"
+            
+    elif task == 3:
+        prompt = 
     return prompt
 
 def generate_examples(word:str, task:int):
@@ -42,6 +49,7 @@ def generate_examples(word:str, task:int):
                 example = DataInstance(word, defn, sentence[0], defns)
                 prompt = format_example(example, task)
                 instances.append({'word': word, 'definition': defn, 'sentence': sentence[0], 'prompt': prompt, 'choices': defns})
+    # Task 3:
     elif task == 3:
         pass
     return instances if instances else []
