@@ -19,6 +19,6 @@ if __name__ == "__main__":
     if argv[1]:
         quant_config = QuantoConfig(weights="int4")
         model = AutoModelForCausalLM.from_pretrained(architectures[int(argv[1])], quantization_config = quant_config)
-        tokenizer = AutoTokenizer.from_pretrained(model)
+        tokenizer = AutoTokenizer.from_pretrained(architectures[int(argv[1])])
         data = load_data(int(argv[2]))
 
