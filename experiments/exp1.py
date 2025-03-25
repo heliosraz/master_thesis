@@ -18,7 +18,7 @@ def run(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, data: dict):
         input_ids = tokenizer(instance["prompt"])
         outputs = model.generate(input_ids, do_sample=False, max_new_tokens=30)
         results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": tokenizer.batch_decode(outputs, skip_special_tokens=True)})
-        
+    return results
 
 if __name__ == "__main__":
     if argv[1]:
@@ -26,4 +26,7 @@ if __name__ == "__main__":
         model = AutoModelForCausalLM.from_pretrained(architectures[int(argv[1])], quantization_config = quant_config)
         tokenizer = AutoTokenizer.from_pretrained(architectures[int(argv[1])])
         data = load_data(int(argv[2]))
+        results = run(model, tokenizer, data)
+        with open(f"./results/task{argv[2]}.json", "w") as fp:
+            json.dump(results, fp, indent=4)
 
