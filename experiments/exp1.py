@@ -13,7 +13,12 @@ def load_data(task:int):
     return data
 
 def run(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, data: dict):
-    pass
+    results = []
+    for instance in data[0]:
+        input_ids = tokenizer(instance["prompt"])
+        outputs = model.generate(input_ids, do_sample=False, max_new_tokens=30)
+        results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": tokenizer.batch_decode(outputs, skip_special_tokens=True)})
+        
 
 if __name__ == "__main__":
     if argv[1]:
