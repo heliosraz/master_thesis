@@ -7,4 +7,4 @@
 #SBATCH --mem-per-cpu=40964
 
 source ~/miniconda3/bin/activate nlp
-PYTHONPATH=$PWD python3 ./experiments/exp1.py 0 1
+PYTHONPATH=$PWD python3 ./experiments/exp1.py

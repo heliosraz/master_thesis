@@ -14,17 +14,17 @@ class DataInstance():
 
 def format_example(example:DataInstance, task:int):
     if task == 1:
-        prompt = [(f"How well does \"{example.definition}\" describe {example.word} in this sentence? \n"
+        prompt = [(f"Question: How well does \"{example.definition}\" describe \"{example.word}\" in this sentence? \n"
                 f"Sentence: {example.example}"),
-                "Can you provide justification for your answer?"]
+                "Question: Can you provide justification for your answer?"]
         # ranking the senses for this word
             # how well does this definition fit the word in this sentence?
     elif task == 2:
-        prompt = [(f"Give a definition that matches {example.word} in \"{example.example}\"?\n")]
+        prompt = [(f"Instruction: Give a definition that matches \"{example.word}\" in \"{example.example}\"?\n")]
     elif task == 3:
-        prompt = [(f"What words in \"{example.definition}\" are the key words in defining {example.word}"),(f"How do each of these keywords contribute to the definition?")]
+        prompt = [(f"Question: What words in \"{example.definition}\" are the key words in defining \"{example.word}\""),(f"Question: How do each of these keywords contribute to the definition?")]
     elif task == 4:
-        prompt = [(f"Replace {example.word} with a word that matches the meaning the closest in the sentence:{example.example}")]
+        prompt = [(f"Instruction: Replace \"{example.word}\" with a word that matches the meaning the closest in the sentence:{example.example}")]
     return prompt
 
 def generate_examples(word:str, pairs: Iterable[Tuple[str, str]], task:int):
