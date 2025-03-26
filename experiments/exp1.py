@@ -3,6 +3,7 @@ from sys import argv, path
 import json
 from utils import hf_login
 import os
+from tqdm import tqdm
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 architectures = ["meta-llama/Llama-3.2-1B-Instruct", "deepseek-ai/DeepSeek-R1", "google/gemma-3-27b-it", "mistralai/Mistral-Small-3.1-24B-Instruct-2503"] #distill version
@@ -18,7 +19,8 @@ def load_data(task:int):
 
 def run(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, data: dict):
     results = []
-    for instance in data:
+    iteration = 0
+    for instance in tqdm(data):
         prompt = ""
         responses = []
         for p in instance["prompt"]:
@@ -28,8 +30,11 @@ def run(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, data: dict):
             response = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0].replace(prompt, "")
             prompt += "Answer: "+response +"\n"
             responses.append(response)
-            print(response)
         results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
+        if iteration % 100 == 9:
+            with open(f"./results/{architectures[arch].split("/")[1]}-task{i}.json", "w") as fp:
+                json.dump(results, fp, indent=4)
+        iteration += 1
     return results
 
 if __name__ == "__main__":
@@ -42,7 +47,7 @@ if __name__ == "__main__":
         with open(f"./results/{architectures[int(argv[1])].split("/")[1]}-task{int(argv[2])}.json", "w") as fp:
             json.dump(results, fp, indent=4)
     else:
-        for i in range(1, 5):
+        for i in range(4,0,-1):
             for arch in range(len(architectures)):
                 quant_config = QuantoConfig(weights="int4")
                 model = AutoModelForCausalLM.from_pretrained(architectures[arch], quantization_config = quant_config)
