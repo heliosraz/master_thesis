@@ -30,7 +30,10 @@ def run(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, data: dict):
             response = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0].replace(prompt, "")
             prompt += "Answer: "+response +"\n"
             responses.append(response)
-        results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
+        if "gold" in instance:
+            results.append({"word": instance["word"], "definition": instance["definition"], "gold": instance["gold"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
+        else:
+            results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         if iteration % 100 == 9:
             with open(f"./results/{architectures[arch].split("/")[1]}-task{i}.json", "w") as fp:
                 json.dump(results, fp, indent=4)
