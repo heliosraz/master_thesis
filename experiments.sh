@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --job-name=task1_the
-#SBATCH --output=output.txt
+#SBATCH --job-name=experiments
+#SBATCH --output=experiment_output.txt
 #SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=40964
