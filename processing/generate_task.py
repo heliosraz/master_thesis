@@ -1,4 +1,4 @@
-from typing import Tuple, Iterable
+from typing import Dict, Tuple, Iterable
 from nltk.corpus import wordnet as wn
 import json
 import os
@@ -24,32 +24,34 @@ def format_example(example:DataInstance, task:int):
     elif task == 3:
         prompt = [(f"Question: What words in \"{example.definition}\" are the key words in defining \"{example.word}\""),(f"Question: How do each of these keywords contribute to the definition?")]
     elif task == 4:
-        prompt = [(f"Instruction: Replace \"{example.word}\" with a word that matches the meaning the closest in the sentence:{example.example}")]
+        prompt = [(f"Instruction: Replace \"{example.word}\" with a word that matches the meaning the closest in the sentence: {example.example}")]
     return prompt
 
-def generate_examples(word:str, pairs: Iterable[Tuple[str, str]], task:int):
+def generate_examples(word:str, pairs: Iterable[Tuple[str, str]], task:int, gold: Dict[tuple, str]=None):
     examples = []
     for defn, sentence in pairs:
         filter_sentence = [s for s in sentence if word in s]
         if defn and filter_sentence:
             example = DataInstance(word, defn, filter_sentence[0])
             prompt = format_example(example, task)
-            examples.append({'word': word, 'definition': defn, 'sentence': sentence[0], 'prompt': prompt})
+            if gold:
+                examples.append({'word': word, 'definition': defn, 'gold': gold[sentence], 'sentence': sentence[0], 'prompt': prompt})
+            else: examples.append({'word': word, 'definition': defn , 'sentence': sentence[0], 'prompt': prompt})
     return examples
 
 def task_helper(word:str, task:int):
     instances = []
     defns = [synset.definition() for synset in wn.synsets(word)]
-    sentences = [[ex.replace(synset.name().split(".")[0].replace("_", " "), word.replace("_", " ")) 
-                    for ex in synset.examples()] 
-                    for synset in wn.synsets(word)]
+    sentences = {tuple(ex.replace(synset.name().split(".")[0].replace("_", " "), word.replace("_", " ")) 
+                    for ex in synset.examples()):synset.definition() 
+                    for synset in wn.synsets(word)}
     word = word.replace("_", " ")
     # Task 1:
     if task == 1:
-        instances += generate_examples(word, itertools.product(defns, sentences), task)
+        instances += generate_examples(word, itertools.product(defns, sentences), task, gold = sentences)
     # Task 2:
     elif task == 2:
-        instances += generate_examples(word, zip(defns, sentences), task)
+        instances += generate_examples(word, zip(defns, sentences), task, gold = sentences)
     # Task 3:
     elif task == 3:
         instances += generate_examples(word, zip(defns, sentences), task)
