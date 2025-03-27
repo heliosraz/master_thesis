@@ -8,4 +8,4 @@
 #SBATCH --partition=regular
 
 source ~/miniconda3/bin/activate nlp
-PYTHONPATH=$PWD python3 ./experiments/exp1.py
+PYTHONPATH=$PWD python3 ./experiments/exp1.py 0 1
