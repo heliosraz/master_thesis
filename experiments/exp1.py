@@ -34,7 +34,7 @@ def run(model: AutoModelForCausalLM, tokenizer: AutoTokenizer, data: dict):
             results.append({"word": instance["word"], "definition": instance["definition"], "gold": instance["gold"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         else:
             results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
-        if iteration % 100 == 9:
+        if iteration % 10 == 9:
             with open(f"./results/{architectures[arch].split("/")[1]}-task{i}.json", "w") as fp:
                 json.dump(results, fp, indent=4)
         iteration += 1
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         with open(f"./results/{architectures[int(argv[1])].split("/")[1]}-task{int(argv[2])}.json", "w") as fp:
             json.dump(results, fp, indent=4)
     else:
-        for i in range(4,0,-1):
+        for i in range(5):
             for arch in range(len(architectures)):
                 quant_config = QuantoConfig(weights="int4")
                 model = AutoModelForCausalLM.from_pretrained(architectures[arch], quantization_config = quant_config)

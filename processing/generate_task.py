@@ -3,6 +3,7 @@ from nltk.corpus import wordnet as wn
 import json
 import os
 import itertools
+import pandas as pd
 
 print(os.getcwd())
 
@@ -20,11 +21,14 @@ def format_example(example:DataInstance, task:int):
         # ranking the senses for this word
             # how well does this definition fit the word in this sentence?
     elif task == 2:
-        prompt = [(f"Instruction: Give a definition that matches \"{example.word}\" in \"{example.example}\"?\n")]
+        prompt = [(f"Instruction: Give a definition that matches \"{example.word}\" in \"{example.example}\"?")]
     elif task == 3:
         prompt = [(f"Question: What words in \"{example.definition}\" are the key words in defining \"{example.word}\""),(f"Question: How do each of these keywords contribute to the definition?")]
     elif task == 4:
         prompt = [(f"Instruction: Replace \"{example.word}\" with a word that matches the meaning the closest in the sentence: {example.example}")]
+    elif task == 5:
+        prompt = [(f"Question: A dog means an informal term for a man. An example of the sentence is:\nyou lucky dog.\n"
+            f"A {example.word} means {example.definition}. An example of the sentence is: ")]
     return prompt
 
 def generate_examples(word:str, pairs: Iterable[Tuple[str, str]], task:int, gold: Dict[tuple, str]=None):
@@ -61,14 +65,24 @@ def task_helper(word:str, task:int):
     return instances if instances else []
 
 if __name__ == "__main__":
+    with open("./data/corpora/COCA_WordFrequency.csv",'r') as fp:
+        data = pd.read_csv(fp)
+        data = data[data.PoS == "n"].lemma[:1000]
+    with open("./data/corpora/most_common.json", "w") as fp:
+        json.dump(data.to_list(), fp=fp)
+    with open("./data/corpora/most_common.json", "r") as fp:
+        most_common = set(json.load(fp))
     tasks = [1,2,3,4]
+    nouns = set([n.name().split(".")[0] for n in list(wn.all_synsets('n')) 
+                    if n.name().split(".")[0] in most_common and "_" not in n.name()])
+    with open("./data/corpora/nouns.txt", "w") as fp:
+        print(nouns, file=fp)
     for task in tasks:
-        nouns = set([n.name().split(".")[0] for n in list(wn.all_synsets('n'))])
         result = []
         for noun in nouns:
             examples = task_helper(noun, task)
             if examples:
                 result += examples
         print(len(result))
-        with open(f"./data/task{task}.json", "w") as fp:
+        with open(f"./data/tasks/task{task}.json", "w") as fp:
             json.dump(result, fp, indent=4)
