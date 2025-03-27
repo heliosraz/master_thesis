@@ -11,7 +11,7 @@ data_address = "./data/task1.json"
 path.append("..")
 
 def load_data(task:int):
-    data_file = f"./data/task{task}.json"
+    data_file = f"./data/tasks/task{task}.json"
     data = []
     with open(data_file, "r") as fp:
         data = json.load(fp)
