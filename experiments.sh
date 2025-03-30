@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=exp
+#SBATCH --output=experiment_output.txt
 #SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=40964
