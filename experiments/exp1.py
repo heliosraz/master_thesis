@@ -47,7 +47,7 @@ if __name__ == "__main__":
     for arch in arches:
         for task in tasks:
             model = architectures[arch]()
-            data = load_data(int(argv[2]))
+            data = load_data(task)
             results = run(model, data)
             checkpoint(arch, task, results)
         
