@@ -46,11 +46,9 @@ if __name__ == "__main__":
         tasks = [1, 2, 3, 4]
     for arch in arches:
         for task in tasks:
-            arch = int(argv[1])
-            i = int(argv[2])
             model = architectures[arch]()
             data = load_data(int(argv[2]))
             results = run(model, data)
-            checkpoint(arch, i, results)
+            checkpoint(arch, task, results)
         
 
