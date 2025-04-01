@@ -9,7 +9,7 @@
 source ~/miniconda3/bin/activate nlp
 vllm serve mistralai/Mistral-Small-3.1-24B-Instruct-2503 --tokenizer_mode mistral --config_format mistral --load_format mistral --tool-call-parser mistral --enable-auto-tool-choice --limit_mm_per_prompt 'image=10' --tensor-parallel-size 2
 if [ -n "$1" ]; then
-    PYTHONPATH=$PWD python3 ./experiments/exp1.py 2 $1
+    PYTHONPATH=~/master_thesis python3 ~/master_thesis/experiments/exp1.py 2 $1
 else
-    PYTHONPATH=$PWD python3 ./experiments/exp1.py 2
+    PYTHONPATH=~/master_thesis python3 ~/master_thesis/experiments/exp1.py 2
 fi

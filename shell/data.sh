@@ -7,4 +7,4 @@
 #SBATCH --partition=regular
 
 source ~/miniconda3/bin/activate nlp
-PYTHONPATH=$PWD python3 ./processing/generate_task.py
+PYTHONPATH=~/master_thesis python3 ~/master_thesis/processing/generate_task.py

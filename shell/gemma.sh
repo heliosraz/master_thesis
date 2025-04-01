@@ -9,8 +9,8 @@
 
 source ~/miniconda3/bin/activate nlp
 if [ -n "$1" ]; then
-    PYTHONPATH=$PWD python3 ../experiments/exp1.py 1 $1
+    PYTHONPATH=~/master_thesis python3 ~/master_thesis/experiments/exp1.py 1 $1
 else
-    PYTHONPATH=$PWD python3 ../experiments/exp1.py 1
+    PYTHONPATH=~/master_thesis python3 ~/master_thesis/experiments/exp1.py 1
 fi
 
