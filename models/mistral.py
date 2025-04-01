@@ -33,6 +33,7 @@ SYSTEM_PROMPT = load_system_prompt(model, "SYSTEM_PROMPT.txt")
 
 class Mistral(nn.Module):
     def __init__(self):
+        super(Mistral, self).__init__()
         self.model = LLM(model = "mistralai/Mistral-Small-3.1-24B-Instruct-2503", tokenizer_mode="mistral")
         
     def forward(self, prompts: List[str]):

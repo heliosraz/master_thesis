@@ -3,6 +3,7 @@ from torch import nn
 
 class Gemma(nn.Module):
     def __init__(self, model_id: str = "google/gemma-3-27b-it", device: str = "cuda"):
+        super(Gemma, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)

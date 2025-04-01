@@ -4,6 +4,7 @@ from torch import nn
 
 class Llama(nn.Module):
     def __init__(self, model_id: str = "meta-llama/Llama-3.3-70B-Instruct", device: str = "cuda"):
+        super(Llama, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)
