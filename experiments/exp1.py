@@ -10,21 +10,21 @@ from torch import nn
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 architectures = [Llama, Gemma, Mistral] #distill version
-data_address = "./data/tasks/task1.json"
+data_address = "../data/tasks/task1.json"
 path.append("..")
 
 def load_data(task:int):
-    data_file = f"./data/tasks/task{task}.json"
+    data_file = f"../data/tasks/task{task}.json"
     data = []
     with open(data_file, "r") as fp:
         data = json.load(fp)
     return data
 
 def checkpoint(arch: int, i: int, results: List[dict]):
-    with open(f"./results/{str(architectures[arch])}-task{i}.json", "w") as fp:
+    with open(f"../results/{str(architectures[arch])}-task{i}.json", "w") as fp:
         json.dump(results, fp, indent=4)
 
-def run(model:nn.Module, data: List[dict]):
+def run(model:nn.Module, data: List[dict], task: int):
     results = []
     iteration = 0
     for instance in tqdm(data):
@@ -34,7 +34,7 @@ def run(model:nn.Module, data: List[dict]):
         else:
             results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         if iteration % 10 == 9:
-            checkpoint(arch, i, results)
+            checkpoint(arch, task, results)
         iteration += 1
     return results
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         for task in tasks:
             model = architectures[arch]()
             data = load_data(task)
-            results = run(model, data)
+            results = run(model, data, task)
             checkpoint(arch, task, results)
         
 
