@@ -9,7 +9,7 @@ from torch import nn
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-architectures = [Llama, "google/gemma-3-27b-it", Mistral] #distill version
+architectures = [Llama, Gemma, Mistral] #distill version
 data_address = "./data/tasks/task1.json"
 path.append("..")
 
