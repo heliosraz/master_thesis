@@ -7,6 +7,9 @@ class Llama(nn.Module):
         print(f"Loading {model_id} model...")
         super(Llama, self).__init__()
         quant_config = QuantoConfig(weights="int2")
+        import quanto
+        print(quanto.__file__)
+        print(quanto.cuda.is_available())
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)
         self.device = device
