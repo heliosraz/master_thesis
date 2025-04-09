@@ -6,7 +6,6 @@
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=40964
 #SBATCH --partition=regular
-#SBATCH --debug
 
 source ~/miniconda3/bin/activate nlp
 echo "TESTING"
