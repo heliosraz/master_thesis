@@ -1,6 +1,6 @@
 from typing import List
 from sys import argv, path
-path.append("..")
+path.append("~/master_thesis/")
 import json
 import os
 from tqdm import tqdm
