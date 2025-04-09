@@ -178,3 +178,4 @@ secrets.json
 /data
 output.txt
 /results
+/shell/output/
