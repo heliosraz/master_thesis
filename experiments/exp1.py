@@ -1,5 +1,6 @@
 from typing import List
 from sys import argv, path
+path.append("..")
 import json
 import os
 from tqdm import tqdm
@@ -10,7 +11,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 architectures = [Llama, Gemma, Mistral] #distill version
 data_address = "../data/tasks/task1.json"
-path.append("..")
+
 
 def load_data(task:int):
     data_file = f"../data/tasks/task{task}.json"
