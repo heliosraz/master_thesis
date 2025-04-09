@@ -39,6 +39,7 @@ def run(model:nn.Module, data: List[dict], task: int):
     return results
 
 if __name__ == "__main__":
+    print("#### Test ####")
     arches = [int(argv[1])]
     if len(argv)>2:
         tasks = [int(argv[2])]
@@ -46,6 +47,7 @@ if __name__ == "__main__":
         tasks = [1, 2, 3, 4]
     for arch in arches:
         for task in tasks:
+            print(f"Running architecture {arch} on task {task}")
             model = architectures[arch]()
             data = load_data(task)
             results = run(model, data, task)
