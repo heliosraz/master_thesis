@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=llama
 #SBATCH --output=./output/llama_output.txt
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #SBATCH --partition=regular
 
 source ~/miniconda3/bin/activate nlp
