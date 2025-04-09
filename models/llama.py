@@ -10,6 +10,7 @@ class Llama(nn.Module):
         import quanto
         print(quanto.__file__)
         print(quanto.cuda.is_available())
+        print("########################test###########################")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)
         self.device = device
