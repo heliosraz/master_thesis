@@ -3,17 +3,13 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, QuantoConfig
 from torch import nn
 
 class Llama(nn.Module):
-    def __init__(self, model_id: str = "meta-llama/Llama-3.2-1B-Instruct", device: str = "cuda"):
-        print(f"Loading {model_id} model...")
+    def __init__(self, model_id: str = "meta-llama/Llama-3.2-3B-Instruct", device: str = "cuda"):
+        print("Loading {model_id} model...")
         super(Llama, self).__init__()
-        quant_config = QuantoConfig(weights="int2")
-        import quanto
-        print(quanto.__file__)
-        print(quanto.cuda.is_available())
-        print("########################test###########################")
-        # self.tokenizer = AutoTokenizer.from_pretrained(model_id)
-        # self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)
-        # self.device = device
+        quant_config = QuantoConfig(weights="int4")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)
+        self.device = device
         
     def forward(self, prompts: List[str]):
         messages = []
