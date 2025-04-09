@@ -1,9 +1,9 @@
 from typing import List
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, QuantoConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, QuantoConfig
 from torch import nn
 
 class Llama(nn.Module):
-    def __init__(self, model_id: str = "meta-llama/Llama-3.3-70B-Instruct", device: str = "cuda"):
+    def __init__(self, model_id: str = "meta-llama/Llama-4-Scout-17B-16E-Instruct", device: str = "cuda"):
         super(Llama, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -17,7 +17,7 @@ class Llama(nn.Module):
             messages.append({"role": "user", "content": p})
             prompt += p + "\n"
             input_prompt = self.tokenizer(prompt, return_tensors="pt")
-            outputs = self.model.generate(input_prompt.input_ids.to(self.device), num_beams = 3, max_new_tokens = 100, attention_mask=input_prompt.attention_mask.to(self.device))
+            outputs = self.model.generate(input_prompt.input_ids.to(self.device), num_beams = 5, max_new_tokens = 100, attention_mask=input_prompt.attention_mask.to(self.device))
             response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0][:len(prompt)]
             prompt += "Answer: "+response +"\n"
             messages.append({"role": "assistant", "content": response})
