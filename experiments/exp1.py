@@ -1,5 +1,4 @@
 from typing import List
-from transformers import AutoTokenizer, AutoModelForCausalLM, QuantoConfig
 from sys import argv, path
 import json
 import os

@@ -8,7 +8,6 @@
 #SBATCH --partition=regular
 
 source ~/miniconda3/bin/activate nlp
-echo "TESTING"
 if [ -n "$1" ]; then
     python3 ~/master_thesis/experiments/exp1.py 0 $1
 else
