@@ -2,6 +2,7 @@
 
 #SBATCH --job-name=llama
 #SBATCH --output=./output/llama_output.txt
+#SBATCH --error=./output/llama_error.txt
 #SBATCH --gres=gpu:1
 #SBATCH --partition=regular
 
