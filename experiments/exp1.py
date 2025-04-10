@@ -22,7 +22,7 @@ def load_data(task:int):
     return data
 
 def checkpoint(arch: int, i: int, results: List[dict]):
-    data_path = os.path.join(script_dir, "..", "result", "tasks", f"{str(architectures[arch])}-task{i}.json")
+    data_path = os.path.join(script_dir, "..", "results", f"{str(architectures[arch])}-task{i}.json")
     with open(data_path, "w") as fp:
         json.dump(results, fp, indent=4)
 
