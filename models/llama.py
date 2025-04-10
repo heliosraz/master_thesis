@@ -20,7 +20,8 @@ class Llama(nn.Module):
             prompt += p + "\n"
             input_prompt = self.tokenizer(prompt, return_tensors="pt")
             outputs = self.model.generate(input_prompt.input_ids.to(self.device), max_new_tokens = 100, attention_mask=input_prompt.attention_mask.to(self.device), pad_token_id = self.tokenizer.eos_token_id)
-            response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0][:len(prompt)]
+            response = self.tokenizer.decode(outputs, skip_special_tokens=True)[:len(prompt)]
+            print(response)
             prompt += "Answer: "+response +"\n"
             messages.append({"role": "assistant", "content": response})
         return messages
