@@ -5,7 +5,7 @@
 #SBATCH --ntasks=10
 #SBATCH --mem-per-cpu=40964
 #SBATCH --partition=regular
-#SBATCH --error=./output/gemma_error.txt
+#SBATCH --error=gemma_error.txt
 
 echo "Starting the script..."
 echo "SLURM_JOB_ID: $SLURM_JOB_ID"
