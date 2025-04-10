@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#SBATCH --job-name=deepseek
-#SBATCH --output=./shell/output/deepseek_output.txt
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=40964

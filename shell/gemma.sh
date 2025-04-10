@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#SBATCH --output=./shell/output/gemma_output.txt
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=40964
