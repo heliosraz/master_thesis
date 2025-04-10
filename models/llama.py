@@ -4,7 +4,7 @@ from torch import nn
 import torch
 
 class Llama(nn.Module):
-    def __init__(self, model_id: str = "meta-llama/Llama-3.2-3B-Instruct", device: str = "cuda"):
+    def __init__(self, model_id: str = "meta-llama/Llama-3.2-3B-Instruct", device: str = "mps"):
         super(Llama, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -31,7 +31,7 @@ class Llama(nn.Module):
                     max_new_tokens = 100, 
                     pad_token_id=self.tokenizer.eos_token_id,
                     )
-                response = self.tokenizer.decode(outputs, skip_special_tokens=True)[len(prompt):]
+                response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0][len(prompt):]
                 prompt += "Answer: "+response +"\n"
                 messages.append({"role": "assistant", "content": response})
         return messages
