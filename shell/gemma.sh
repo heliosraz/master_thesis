@@ -3,6 +3,8 @@
 #SBATCH --job-name=gemma_test
 #SBATCH --error=gemma_error.txt
 #SBATCH --cpus-per-task=1
+# SBATCH --mem-per-cpu=40964
+# SBATCH --partition=regular
 
 echo "Starting the script..."
 echo "SLURM_JOB_ID: $SLURM_JOB_ID"
