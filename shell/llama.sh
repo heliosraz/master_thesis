@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#SBATCH --job-name=llama
 #SBATCH --output=./shell/output/llama_output.txt
 #SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=10

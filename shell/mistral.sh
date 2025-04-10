@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=mistral
+
 #SBATCH --output=./shell/output/mistral_output.txt
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=10
