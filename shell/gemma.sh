@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #SBATCH --job-name=gemma_test
-#SBATCH --output=gemma_test_output.txt
-#SBATCH --error=test_error.txt
-#SBATCH --cpus-per-task=1
+#SBATCH --error=gemma_error.txt
+#SBATCH --output=./output/gemma_output.txt
+#SBATCH --ntasks=10
 
 
 echo "Starting the script..."
