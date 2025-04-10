@@ -1,17 +1,12 @@
 #!/bin/bash
 
-#SBATCH --job-name=gemma_test
-#SBATCH --output=./shell/output/test_output.txt
-#SBATCH --error=gemma_error.txt
+#SBATCH --job-name=gemma
+#SBATCH --output=./shell/output/gemma_output.txt
+#SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=10
-# SBATCH --mem-per-cpu=40964
-# SBATCH --partition=regular
+#SBATCH --mem-per-cpu=40964
+#SBATCH --partition=regular
 
-
-echo "Starting the script..."
-echo "SLURM_JOB_ID: $SLURM_JOB_ID"
-echo "SLURM_NODELIST: $SLURM_NODELIST"
-echo "SLURM_JOB_NAME: $SLURM_JOB_NAME"
 
 source ~/miniconda3/bin/activate nlp
 if [ -n "$1" ]; then
