@@ -41,7 +41,6 @@ def run(model:nn.Module, data: List[dict], task: int):
     return results
 
 if __name__ == "__main__":
-    print("#### Test ####")
     arches = [int(argv[1])]
     if len(argv)>2:
         tasks = [int(argv[2])]
