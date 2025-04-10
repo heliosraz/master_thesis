@@ -2,9 +2,7 @@
 
 #SBATCH --job-name=gemma_test
 #SBATCH --error=gemma_error.txt
-#SBATCH --output=./output/gemma_output.txt
-#SBATCH --ntasks=10
-
+#SBATCH --cpus-per-task=1
 
 echo "Starting the script..."
 echo "SLURM_JOB_ID: $SLURM_JOB_ID"
