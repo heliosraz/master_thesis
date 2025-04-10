@@ -2,7 +2,6 @@
 
 #SBATCH --job-name=gemma
 #SBATCH --output=./output/gemma_output.txt
-#SBATCH --gres=gpu:2
 #SBATCH --ntasks=10
 #SBATCH --mem-per-cpu=40964
 #SBATCH --partition=regular
