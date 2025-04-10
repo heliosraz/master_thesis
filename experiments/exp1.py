@@ -21,8 +21,8 @@ def load_data(task:int):
         data = json.load(fp)
     return data
 
-def checkpoint(arch: int, i: int, results: List[dict]):
-    data_path = os.path.join(script_dir, "..", "results", f"{str(architectures[arch])}-task{i}.json")
+def checkpoint(model:nn.Module, i: int, results: List[dict]):
+    data_path = os.path.join(script_dir, "..", "results", f"{str(model)}-task{i}.json")
     with open(data_path, "w") as fp:
         json.dump(results, fp, indent=4)
 
@@ -36,7 +36,7 @@ def run(model:nn.Module, data: List[dict], task: int):
         else:
             results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         if iteration % 10 == 9:
-            checkpoint(arch, task, results)
+            checkpoint(model, task, results)
         iteration += 1
     return results
 
