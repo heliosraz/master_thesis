@@ -7,21 +7,23 @@ from tqdm import tqdm
 from models import Llama, Mistral, Gemma
 from torch import nn
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 architectures = [Llama, Gemma, Mistral] #distill version
-data_address = ""
 
 
 def load_data(task:int):
-    data_file = f"~/master_thesis/data/tasks/task{task}.json"
+    data_path = os.path.join(script_dir, "..", "data", "tasks", f"task{task}.json")
     data = []
-    with open(data_file, "r") as fp:
+    with open(data_path, "r") as fp:
         data = json.load(fp)
     return data
 
 def checkpoint(arch: int, i: int, results: List[dict]):
-    with open(f"../results/{str(architectures[arch])}-task{i}.json", "w") as fp:
+    data_path = os.path.join(script_dir, "..", "result", "tasks", f"{str(architectures[arch])}-task{i}.json")
+    with open(data_path, "w") as fp:
         json.dump(results, fp, indent=4)
 
 def run(model:nn.Module, data: List[dict], task: int):
