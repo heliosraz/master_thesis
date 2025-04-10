@@ -10,11 +10,11 @@ from torch import nn
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 architectures = [Llama, Gemma, Mistral] #distill version
-data_address = "../data/tasks/task1.json"
+data_address = ""
 
 
 def load_data(task:int):
-    data_file = f"../data/tasks/task{task}.json"
+    data_file = f"~/master_thesis/data/tasks/task{task}.json"
     data = []
     with open(data_file, "r") as fp:
         data = json.load(fp)
