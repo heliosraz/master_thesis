@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, QuantoCo
 from torch import nn
 
 class Gemma(nn.Module):
-    def __init__(self, model_id: str = "google/gemma-3-12b-it", device: str = "auto"):
+    def __init__(self, model_id: str = "google/gemma-3-12b-it", device: str = "cuda"):
         super(Gemma, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)

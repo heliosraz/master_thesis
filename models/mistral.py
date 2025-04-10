@@ -4,7 +4,7 @@ from torch import nn
 import torch
 
 class Mistral(nn.Module):
-    def __init__(self, model_id: str = "mistralai/Mistral-7B-Instruct-v0.3", device: str = "auto"):
+    def __init__(self, model_id: str = "mistralai/Mistral-7B-Instruct-v0.3", device: str = "cuda"):
         super(Mistral, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)

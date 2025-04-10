@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=mistral
 #SBATCH --output=./shell/output/mistral_output.txt
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=10
 #SBATCH --mem-per-cpu=40964
 #SBATCH --partition=regular

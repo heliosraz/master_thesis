@@ -5,14 +5,14 @@ import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
 path.append(os.path.join(script_dir, ".."))
 from tqdm import tqdm
-from models import Llama, Mistral, Gemma
+from models import Llama, Mistral, Gemma, DeepSeek
 from torch import nn
 
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-architectures = [Llama, Gemma, Mistral] #distill version
+architectures = [Llama, Gemma, Mistral, DeepSeek] #distill version
 
 
 def load_data(task:int):
