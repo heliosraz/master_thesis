@@ -1,13 +1,12 @@
 #!/bin/bash
 
 #SBATCH --job-name=gemma_test
-#SBATCH --output=test_output.txt
+#SBATCH --output=./shell/output/test_output.txt
 #SBATCH --error=gemma_error.txt
 #SBATCH --cpus-per-task=10
 # SBATCH --mem-per-cpu=40964
 # SBATCH --partition=regular
 
-pwd
 
 echo "Starting the script..."
 echo "SLURM_JOB_ID: $SLURM_JOB_ID"
