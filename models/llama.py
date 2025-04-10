@@ -29,12 +29,12 @@ class Llama(nn.Module):
                     top_k=50, 
                     top_p=0.95,
                     max_new_tokens = 100, 
-                    early_stopping=True,
                     pad_token_id=self.tokenizer.eos_token_id,
                     )
                 response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0][:len(prompt)]
                 prompt += "Answer: "+response +"\n"
                 messages.append({"role": "assistant", "content": response})
+        print(messages)
         return messages
     
     def __str__(self):
