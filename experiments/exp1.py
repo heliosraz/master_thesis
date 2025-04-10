@@ -1,13 +1,14 @@
 from typing import List
 from sys import argv, path
-path.append("~/master_thesis/")
 import json
 import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+path.append(os.path.join(script_dir, ".."))
 from tqdm import tqdm
 from models import Llama, Mistral, Gemma
 from torch import nn
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -41,7 +42,10 @@ def run(model:nn.Module, data: List[dict], task: int):
     return results
 
 if __name__ == "__main__":
-    arches = [int(argv[1])]
+    if len(argv) ==1:
+        arches = [0, 1, 2]
+    else:
+        arches = [int(argv[1])]
     if len(argv)>2:
         tasks = [int(argv[2])]
     else:

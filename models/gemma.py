@@ -3,12 +3,14 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, QuantoCo
 from torch import nn
 
 class Gemma(nn.Module):
-    def __init__(self, model_id: str = "google/gemma-3-12b-it", device: str = "cuda"):
+    def __init__(self, model_id: str = "google/gemma-3-12b-it", device: str = "auto"):
         super(Gemma, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.tokenizer.padding_side = "left"
         self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)
-        self.device = device
+        self.device = self.model.device
+        self.model_id = model_id
         
     def forward(self, prompts: List[str]):
         messages = []
@@ -26,7 +28,7 @@ class Gemma(nn.Module):
                     max_new_tokens = 100, 
                     pad_token_id=self.tokenizer.eos_token_id,
                     )
-            response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0][:len(prompt)]
+            response = self.tokenizer.decode(outputs, skip_special_tokens=True)[:len(prompt)]
             prompt += "Answer: "+response +"\n"
             messages.append({"role": "assistant", "content": response})
         return messages

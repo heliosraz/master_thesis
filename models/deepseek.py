@@ -4,14 +4,13 @@ from torch import nn
 import torch
 
 class DeepSeek(nn.Module):
-    def __init__(self, model_id: str = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", device: str = "cuda"):
+    def __init__(self, model_id: str = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", device: str = "auto"):
         super(DeepSeek, self).__init__()
         quant_config = QuantoConfig(weights="int4")
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
         self.tokenizer.padding_side = "left"
-        self.tokenizer.pad_token = self.tokenizer.eos_token
         self.model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = quant_config, device_map=device, trust_remote_code=True)
-        self.device = device
+        self.device = self.model.device
         self.model_id = model_id
         
     def forward(self, prompts: List[str]):
