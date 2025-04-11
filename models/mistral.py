@@ -81,7 +81,7 @@ class Mistral(nn.Module):
                     prompt,
                     self.params
                 )
-                response = output.outputs[0].text
+                response = output[0].outputs[0].text
                 prompt += "Answer: "+response + "\n"
                 messages.append({"role": "assistant", "content": response})
         return messages
