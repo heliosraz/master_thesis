@@ -79,7 +79,8 @@ class Mistral(nn.Module):
                 prompt += p + "\n"
                 output = self.llm.generate(
                     prompt,
-                    self.params
+                    self.params,
+                    use_tqdm = False
                 )
                 response = output[0].outputs[0].text
                 prompt += "Answer: "+response + "\n"
