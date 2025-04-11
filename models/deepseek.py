@@ -13,6 +13,12 @@ class DeepSeek(nn.Module):
         self.device = self.model.device
         self.model_id = model_id
         
+    def tokenize(self, text: str):
+        return self.tokenizer.tokenize(text, padding=True, truncation=True)
+    
+    def encode(self, text: str):
+        return self.tokenizer.encode(text, return_tensors="pt")
+        
     def forward(self, prompts: List[str]):
         messages = []
         prompt = ""
@@ -33,7 +39,6 @@ class DeepSeek(nn.Module):
                 response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0][len(prompt):]
                 prompt += "Answer: "+response +"\n"
                 messages.append({"role": "assistant", "content": response})
-        print(messages)
         return messages
     
     def __str__(self):
