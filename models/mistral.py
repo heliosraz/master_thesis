@@ -62,7 +62,6 @@ class Mistral(nn.Module):
             max_tokens=100
         )
         self.llm = LLM(model=model_id, device=device)
-        self.device = self.llm.device
         self.model_id = model_id
 
     # def tokenize(self, text: str):
