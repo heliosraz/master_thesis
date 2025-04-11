@@ -6,7 +6,7 @@ nltk==3.9.1
 numpy==1.26.4
 openai==1.70.0
 pandas==2.2.3
-pip==25.0.1==pyh8b19718_0
+pip==25.0.1
 safetensors==0.5.3
 scipy==1.15.2
 torch==2.6.0
