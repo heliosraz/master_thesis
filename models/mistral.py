@@ -61,7 +61,7 @@ class Mistral(nn.Module):
             top_p=0.95,
             max_tokens=100
         )
-        self.llm = LLM(model_id=model_id, device=device)
+        self.llm = LLM(model=model_id, device=device)
         self.device = self.llm.device
         self.model_id = model_id
 
