@@ -59,7 +59,7 @@ class Mistral(nn.Module):
         self.params = SamplingParams(
             top_k=50,
             top_p=0.95,
-            max_new_tokens=100
+            max_tokens=100
         )
         self.llm = LLM(model_id=model_id, device=device)
         self.device = self.llm.device
