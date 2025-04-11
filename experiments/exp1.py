@@ -10,7 +10,7 @@ from torch import nn
 
 
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 architectures = [Llama, Gemma, Mistral, DeepSeek] #distill version
 
