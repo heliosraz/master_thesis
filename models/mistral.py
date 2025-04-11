@@ -70,7 +70,7 @@ class Mistral(nn.Module):
     # def encode(self, text: str):
     #     return self.tokenizer.encode(text, return_tensors="pt")
 
-    def forward(self, prompts: List[str]):
+    def forward(self, prompts: List[str], use_tqdm = False):
         messages = []
         prompt = ""
         with torch.no_grad():
@@ -80,9 +80,12 @@ class Mistral(nn.Module):
                 output = self.llm.generate(
                     prompt,
                     self.params,
-                    use_tqdm = False
+                    use_tqdm = use_tqdm
                 )
                 response = output[0].outputs[0].text
                 prompt += "Answer: "+response + "\n"
                 messages.append({"role": "assistant", "content": response})
         return messages
+    
+    def __str__(self):
+        return self.model_id.split("/")[-1]

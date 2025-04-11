@@ -31,7 +31,10 @@ def run(model:nn.Module, data: List[dict], task: int):
     results = []
     iteration = 0
     for instance in tqdm(data):
-        responses = model.forward(instance)
+        if task in {2,4}:
+            responses = model.forward(instance, use_tqdm=True)
+        else:
+            responses = model.forward(instance)
         if "gold" in instance:
             results.append({"word": instance["word"], "definition": instance["definition"], "gold": instance["gold"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         else:
