@@ -36,9 +36,9 @@ def run(model:nn.Module, data: List[dict], task: int):
         else:
             responses = model.forward(instance)
         if "gold" in instance:
-            results.append({"word": instance["word"], "definition": instance["definition"], "gold": instance["gold"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
+            results.append({"task":task, "word": instance["word"], "definition": instance["definition"], "gold": instance["gold"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         else:
-            results.append({"word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
+            results.append({"task":task, "word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         if iteration % 10 == 9:
             checkpoint(model, task, results)
         iteration += 1
