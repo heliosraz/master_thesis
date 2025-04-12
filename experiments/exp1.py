@@ -31,7 +31,7 @@ def run(model:nn.Module, data: List[dict], task: int, batch_size: int = 128):
     results = []
     iteration = 0
     use_tqdm = batch_size > 1
-    for start, end in zip(range(0,len(data), batch_size),range(batch_size,len(data))+batch_size, batch_size):
+    for start, end in zip(range(0,len(data), batch_size),range(batch_size,len(data)+batch_size, batch_size)):
         instances = data[start:end]
         responses = model.forward([instance['prompt'] for instance in instances], use_tqdm=use_tqdm)
         for response, instance in zip(responses, instances):
