@@ -60,7 +60,7 @@ if __name__ == "__main__":
             print(f"Running architecture {arch} on task {task}")
             model = architectures[arch]()
             data = load_data(task)
-            batch_size = 64
+            batch_size = 32
             print("Starting inference...")
             results = run(model, data, task, batch_size=batch_size)
             checkpoint(model, task, results)
