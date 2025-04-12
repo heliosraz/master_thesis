@@ -58,7 +58,7 @@ class Gemma(nn.Module):
             top_p=0.95,
             max_tokens=100
         )
-        self.llm = LLM(model=model_id, device=device, gpu_utilization=0.9)
+        self.llm = LLM(model=model_id, device=device, gpu_memory_utilization=0.9)
         self.model_id = model_id
 
     # def tokenize(self, text: str):
