@@ -76,7 +76,7 @@ class Llama(nn.Module):
         with torch.no_grad():
             for i in range(len(prompts[0])):
                 print(results, prompts, sep=",")
-                results = [result.append({"role": "user", "content": instance[i]}) for result, instance in zip(results, prompts)]
+                results = [result+[{"role": "user", "content": instance[i]}] for result, instance in zip(results, prompts)]
                 print(results, prompts, sep=",")
                 prompt = [p+instance[i]+"\n" for p, instance in zip(prompt, prompts)]
                 responses = self.llm.generate(
@@ -84,7 +84,7 @@ class Llama(nn.Module):
                     self.params,
                     use_tqdm = use_tqdm
                 )
-                results = [result.append({"role": "assistant", "content": output.outputs[0].text}) for result, output in zip(results, responses)]
+                results = [result+[{"role": "assistant", "content": output.outputs[0].text}] for result, output in zip(results, responses)]
                 prompt = [p+"Answer: "+output.outputs[0].text + "\n" for p, output in zip(prompt, responses)]
         return results
     
