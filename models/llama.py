@@ -70,22 +70,21 @@ class Llama(nn.Module):
     # def encode(self, text: str):
     #     return self.tokenizer.encode(text, return_tensors="pt")
 
-    def forward(self, prompts: List[str], use_tqdm = False):
-        messages = []
-        prompt = ""
+    def forward(self, prompts: List[List[str]], use_tqdm = False):
+        results = [[] for _ in prompts]
+        prompt = ["" for _ in prompts]
         with torch.no_grad():
-            for p in prompts:
-                messages.append({"role": "user", "content": p})
-                prompt += p + "\n"
-                output = self.llm.generate(
+            for i in len(prompts[0]):
+                results = [result.append({"role": "user", "content": instance[i]}) for result, instance in zip(results, prompts)]
+                prompt = [p+instance[i]+"\n" for p, instance in zip(prompt, prompts)]
+                responses = self.llm.generate(
                     prompt,
                     self.params,
                     use_tqdm = use_tqdm
                 )
-                response = output[0].outputs[0].text
-                prompt += "Answer: "+response + "\n"
-                messages.append({"role": "assistant", "content": response})
-        return messages
+                results = [result.append({"role": "assistant", "content": output.outputs[0].text}) for result, output in zip(results, responses)]
+                prompt = [p+"Answer: "+output.outputs[0].text + "\n" for p, output in zip(prompt, responses)]
+        return results
     
     def __str__(self):
         return self.model_id.split("/")[-1]
