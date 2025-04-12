@@ -51,14 +51,14 @@ import torch
 from vllm import LLM, SamplingParams
 
 class Gemma(nn.Module):
-    def __init__(self, model_id: str = "google/gemma-3-12b-it", device: str = "cuda"):
+    def __init__(self, model_id: str = "google/gemma-3-4b-it", device: str = "cuda"):
         super(Gemma, self).__init__()
         self.params = SamplingParams(
             top_k=50,
             top_p=0.95,
             max_tokens=100
         )
-        self.llm = LLM(model=model_id, device=device, gpu_memory_utilization = 0.5)
+        self.llm = LLM(model=model_id, device=device)
         self.model_id = model_id
 
     # def tokenize(self, text: str):
