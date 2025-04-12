@@ -51,7 +51,7 @@ from vllm import LLM, SamplingParams
 
 class DeepSeek(nn.Module):
     def __init__(self, model_id: str = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", device: str = "cuda"):
-        super(DeepSeek, self).__init__()
+        super(Llama, self).__init__()
         self.params = SamplingParams(
             top_k=50,
             top_p=0.95,
@@ -70,7 +70,7 @@ class DeepSeek(nn.Module):
         messages = []
         prompt = ""
         with torch.no_grad():
-            for p in prompts["prompt"]:
+            for p in prompts:
                 messages.append({"role": "user", "content": p})
                 prompt += p + "\n"
                 output = self.llm.generate(

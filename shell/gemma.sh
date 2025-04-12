@@ -6,7 +6,7 @@
 #SBATCH --partition=regular
 
 
-source ~/miniconda3/bin/activate nlp
+source ~/miniconda3/bin/activate thesis
 if [ -n "$1" ]; then
     python3 ~/master_thesis/experiments/exp1.py 1 $1
 else

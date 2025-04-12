@@ -5,7 +5,7 @@
 #SBATCH --mem-per-cpu=16384
 #SBATCH --partition=regular
 
-source ~/miniconda3/bin/activate nlp
+source ~/miniconda3/bin/activate thesis
 
 if [ -n "$1" ]; then
     python3 ~/master_thesis/experiments/exp1.py 2 $1

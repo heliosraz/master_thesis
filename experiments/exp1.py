@@ -27,21 +27,21 @@ def checkpoint(model:nn.Module, i: int, results: List[dict]):
     with open(data_path, "w") as fp:
         json.dump(results, fp, indent=4)
 
-def run(model:nn.Module, data: List[dict], task: int):
+def run(model:nn.Module, data: List[dict], task: int, batch_size: int = 128):
     results = []
     iteration = 0
-    for instance in tqdm(data):
-        if task in {2,4}:
-            responses = model.forward(instance, use_tqdm=True)
-        else:
-            responses = model.forward(instance)
-        if "gold" in instance:
-            results.append({"task":task, "word": instance["word"], "definition": instance["definition"], "gold": instance["gold"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
-        else:
-            results.append({"task":task, "word": instance["word"], "definition": instance["definition"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
+    use_tqdm = batch_size > 1
+    for start, end in zip(range(0,len(data), batch_size),range(batch_size,len(data))+batch_size, batch_size):
+        instances = data[start:end]
+        responses = model.forward([instance['prompt'] for instance in instances], use_tqdm=use_tqdm)
+        for response, instance in zip(responses, instances):
+            if "gold" in instance:
+                results.append({"task":task, "word": instance["word"], "definition": instance["definition"], "gold": instance["gold"], "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
+            else:
+                results.append({"task":task, "word": instance["word"], "definition": instance["definition"], "gold": "", "sentence": instance["sentence"], "prompt": instance["prompt"], "output": responses})
         if iteration % 10 == 9:
             checkpoint(model, task, results)
-        iteration += 1
+        iteration += batch_size
     return results
 
 if __name__ == "__main__":
@@ -58,7 +58,8 @@ if __name__ == "__main__":
             print(f"Running architecture {arch} on task {task}")
             model = architectures[arch]()
             data = load_data(task)
-            results = run(model, data, task)
+            batch_size = 128 if task in {2,4} else 1
+            results = run(model, data, task, batch_size=batch_size)
             checkpoint(arch, task, results)
         
 

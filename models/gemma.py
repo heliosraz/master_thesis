@@ -71,7 +71,7 @@ class Gemma(nn.Module):
         messages = []
         prompt = ""
         with torch.no_grad():
-            for p in prompts["prompt"]:
+            for p in prompts:
                 messages.append({"role": "user", "content": p})
                 prompt += p + "\n"
                 output = self.llm.generate(
