@@ -7,5 +7,5 @@
 #SBATCH --mem-per-cpu=16384
 #SBATCH --partition=regular
 
-source ~/miniconda3/bin/activate nlp
+source ~/miniconda3/bin/activate thesis
 PYTHONPATH=~/master_thesis python3 ~/master_thesis/processing/generate_task.py
