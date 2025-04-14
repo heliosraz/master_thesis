@@ -1,10 +1,11 @@
-from typing import Dict, Tuple, Iterable, List
+from typing import Dict, List
 import json
 import os
 import sys
+import tqdm
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.os.path.append(os.path.join(script_dir, ".."))
+sys.path.append(os.path.join(script_dir, ".."))
 
 print(os.getcwd())
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +57,7 @@ def main(data_file: str = ""):
         generate_task(data_file)
     else:
         for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results")):
-            for f in files:
+            for f in tqdm(files):
                 print(f)
                 fp = os.path.join(script_dir, "..", "results", f)
                 prompts = generate_task(file_path=fp)
