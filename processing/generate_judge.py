@@ -54,15 +54,18 @@ def save(model_task, prompts):
 
 def main(data_file: str = ""):
     if data_file:
-        generate_task(data_file)
+        fp = os.path.join(script_dir, "..", "results", data_file)
+        generate_task(fp)
     else:
         for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results")):
             for f in tqdm(files):
-                print(f)
                 fp = os.path.join(script_dir, "..", "results", f)
                 prompts = generate_task(file_path=fp)
                 save(model_task = f, prompts = prompts)
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv)>1:
+        main(sys.argv[1])
+    else:
+        main()
