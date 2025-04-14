@@ -1,9 +1,10 @@
 from typing import Dict, Tuple, Iterable, List
 import json
 import os
+import sys
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-os.path.append(os.path.join(script_dir, ".."))
+sys.os.path.append(os.path.join(script_dir, ".."))
 
 print(os.getcwd())
 script_dir = os.path.dirname(os.path.abspath(__file__))
