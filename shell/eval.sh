@@ -6,7 +6,9 @@
 #SBATCH --partition=regular
 
 source ~/miniconda3/bin/activate thesis
-if [ -n "$1" ]; then
+if [ -n "$1" ] && [ -n "$2" ]; then
+    python ~/master_thesis/experiments/eval.py $1 $2
+elif [ -n "$1" ]; then
     python ~/master_thesis/experiments/eval.py $1
 else
     python ~/master_thesis/experiments/eval.py
