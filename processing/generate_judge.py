@@ -49,7 +49,7 @@ def generate_task(file_path: str):
     return results
 
 def save(model_task, prompts):
-    with open(os.path.join(script_dir, "..", "data", "judgement", model_task+".json"),"w") as f:
+    with open(os.path.join(script_dir, "..", "data", "judgement", model_task),"w") as f:
         json.dump(prompts, fp = f, indent = 4)
 
 
