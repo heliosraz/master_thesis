@@ -46,6 +46,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
         print("Saving the responses...")
         for response, instance in zip(responses, instances):
             print(response[-1]["content"])
+            print("###############")
             instance.update({"task": task, "assistant": assistant,
                             "judge": model, "response": response, "score": re.search("\[\[\d+\]\]",response[-1]["content"]).group()})
             results.append(instance)
@@ -54,18 +55,25 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
         iteration += 1
     return results
 
-# def evaluate():
-#     record = {task: {arch: {} for arch in ["Llama", "gemma", "Mistral", "DeepSeek"]} for task in range(1, 5)}
-#     result_path = os.path.join(
-#         script_dir, "..", "results", "judgement")
-#     for root, dirs, files in os.walk(result_path):
-#         for fp in files:
-#             assistant = "-".join(fp.split("-")[:-1])
-#             task = int(fp.split("-")[-1][4])
-#             with open(fp, "r") as f:
-#                 data = json.load(f)
-                
-        
+def evaluate():
+    record = {task: {} for task in range(1, 5)}
+    result_path = os.path.join(
+        script_dir, "..", "results", "judgement")
+    for root, dirs, files in os.walk(result_path):
+        for fp in files:
+            task = int(fp.split("-")[-1][4])
+            assistant = "-".join(fp.split("-")[:-1])
+            if assistant not in record[task]:
+                record[task][assistant] = {}
+            with open(fp, "r") as f:
+                data = json.load(f)
+                data = [(instance["word"], int(re.search("\d+",instance["score"]).group())) for instance in data]
+                for word, score in data:
+                    if word not in record[task][assistant]:
+                        record[task][assistant][word] = (score, 1)
+                    else:
+                        record[task][assistant][word] = (record[task][assistant][word][0]+score, record[task][assistant][word][1]+1)
+    return record
 
 
 def main(arches: List[int]):
