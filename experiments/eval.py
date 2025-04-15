@@ -49,9 +49,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
             
             # min_length == 16
             results.append(instance)
-        if iteration % 10 == 9:
-            checkpoint(model, data_file, results)
-        iteration += 1
+        checkpoint(model, data_file, results)
     return results
 
 def evaluate():
