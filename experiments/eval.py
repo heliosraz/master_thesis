@@ -43,6 +43,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
         instances = data[start:end]
         responses = model.forward([instance['prompt']
                                   for instance in instances], use_tqdm=use_tqdm)
+        print(responses)
         print("Saving the responses...")
         for response, instance in zip(responses, instances):
             instance.update({"task": task, "assistant": assistant,
