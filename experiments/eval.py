@@ -5,7 +5,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 path.append(os.path.join(script_dir, ".."))
 from models import Llama, Mistral, Gemma, DeepSeek
 from tqdm import tqdm
-from typing import List
+from typing import List, Set
 import json
 import re
 
@@ -75,23 +75,31 @@ def evaluate():
     return record
 
 
-def main(arches: List[int]):
+def main(arches: List[int], tasks: Set[int]):
     data_path = os.path.join(script_dir, "..", "data", "judgement")
     for arch in arches:
         model = architectures[arch]()
         for root, dirs, files in os.walk(data_path):
             for data_file in tqdm(files):
-                print(f"Running architecture {arch} on file {data_file}")
-                data = load_data(data_file)
-                batch_size = 128
-                print("Starting inference...")
-                results = run(model, data, data_file, batch_size=batch_size)
-                checkpoint(model, data_file, results)
+                task = int(data_file.split("-")[-1][4])
+                if task in tasks:
+                    print(f"Running architecture {arch} on file {data_file}")
+                    data = load_data(data_file)
+                    batch_size = 128
+                    print("Starting inference...")
+                    results = run(model, data, data_file, batch_size=batch_size)
+                    checkpoint(model, data_file, results)
 
 
 if __name__ == "__main__":
-    if len(argv) == 1:
-        arches = [0, 1, 2]
-    else:
+    if len(argv) == 3:
         arches = [int(argv[1])]
-    main(arches)
+        tasks = set([int(argv[2])])
+    elif len(argv) == 2:
+        arches = [int(argv[1])]
+        tasks = set([1,2,3,4])
+    else:
+        arches = [0, 1, 2]
+        tasks = set([1,2,3,4])
+        
+    main(arches, tasks)
