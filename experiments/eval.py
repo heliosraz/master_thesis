@@ -61,7 +61,7 @@ def main(arches: List[int]):
             for data_file in tqdm(files):
                 print(f"Running architecture {arch} on file {data_file}")
                 data = load_data(data_file)
-                batch_size = 64
+                batch_size = 128
                 print("Starting inference...")
                 results = run(model, data, data_file, batch_size=batch_size)
                 checkpoint(model, data_file, results)
