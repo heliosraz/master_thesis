@@ -102,7 +102,8 @@ if __name__ == "__main__":
         arches = [int(argv[1])]
         tasks = set([1,2,3,4])
     else:
-        arches = [0, 1, 2]
+        arches = [0, 1, 2, 3]
         tasks = set([1,2,3,4])
-        
+    print(arches)
+    print(tasks)
     main(arches, tasks)
