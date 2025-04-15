@@ -1,12 +1,12 @@
 from torch import nn
+import os
+from sys import argv, path
 script_dir = os.path.dirname(os.path.abspath(__file__))
 path.append(os.path.join(script_dir, ".."))
 from models import Llama, Mistral, Gemma, DeepSeek
 from tqdm import tqdm
 from typing import List
-from sys import argv, path
 import json
-import os
 import re
 
 os.mkdir(os.path.join(script_dir, "..", "data", "judgement"), exist_ok=True)
