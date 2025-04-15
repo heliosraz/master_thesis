@@ -35,7 +35,7 @@ def checkpoint(model: nn.Module, data_file: str, results: List[dict]):
 def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 128):
     results = []
     iteration = 0
-    use_tqdm = False
+    use_tqdm = True
     assistant = "-".join(data_file.split("-")[:-1])
     task = int(data_file.split("-")[-1][4])
     for start in tqdm(range(0, len(data), batch_size), desc="Processing batches"):
@@ -69,7 +69,6 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
 
 def main(arches: List[int]):
     data_path = os.path.join(script_dir, "..", "data", "judgement")
-    
     for arch in arches:
         model = architectures[arch]()
         for root, dirs, files in os.walk(data_path):
