@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#SBATCH --job-name=mass
+#SBATCH --job-name=mass_eval
 #SBATCH --partition=regular
 
-sbatch --job-name=llama_1 --output=./shell/output/llama_1_output.txt shell/llama.sh 1
+sbatch --job-name=eval_llama --output=./shell/output/llama_judge_output.txt shell/llama.sh 1
 sbatch --job-name=gemma_1 --output=./shell/output/gemma_1_output.txt shell/gemma.sh 1
 sbatch --job-name=mist_1 --output=./shell/output/mist_1_output.txt shell/mistral.sh 1
 sbatch --job-name=dpseek_1 --output=./shell/output/dpseek_1_output.txt shell/deepseek.sh 1

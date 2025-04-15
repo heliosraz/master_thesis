@@ -9,8 +9,8 @@ from typing import List
 import json
 import re
 
-os.mkdir(os.path.join(script_dir, "..", "data", "judgement"), exist_ok=True)
-os.mkdir(os.path.join(script_dir, "..", "results", "judgement"), exist_ok=True)
+os.makedirs(os.path.join(script_dir, "..", "data", "judgement"), exist_ok=True)
+os.makedirs(os.path.join(script_dir, "..", "results", "judgement"), exist_ok=True)
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
