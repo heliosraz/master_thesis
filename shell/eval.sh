@@ -9,7 +9,7 @@
 
 source ~/miniconda3/bin/activate thesis
 if [ -n "$1" ]; then
-    python ~/master_thesis/experiments/judges.py $1
+    python ~/master_thesis/experiments/eval.py $1
 else
-    python ~/master_thesis/experiments/judges.py
+    python ~/master_thesis/experiments/eval.py
 fi

@@ -53,13 +53,8 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
     return results
 
 
-def main():
+def main(arches: List[int]):
     data_path = os.path.join(script_dir, "..", "data", "judgement")
-
-    if len(argv) == 1:
-        arches = [0, 1, 2]
-    else:
-        arches = [int(argv[1])]
 
     for arch in arches:
         for root, dirs, files in os.walk(data_path):
@@ -74,4 +69,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(argv) == 1:
+        arches = [0, 1, 2]
+    else:
+        arches = [int(argv[1])]
+    main(arches)
