@@ -8,4 +8,8 @@
 #SBATCH --partition=regular
 
 source ~/miniconda3/bin/activate thesis
-python ~/master_thesis/experiments/judges.py
+if [ -n "$1" ]; then
+    python ~/master_thesis/experiments/judges.py $1
+else
+    python ~/master_thesis/experiments/judges.py
+fi
