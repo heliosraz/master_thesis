@@ -45,6 +45,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
                                   for instance in instances], use_tqdm=use_tqdm)
         print("Saving the responses...")
         for response, instance in zip(responses, instances):
+            print(response[-1]["content"])
             instance.update({"task": task, "assistant": assistant,
                             "judge": model, "response": response, "score": re.search("\[\[\d+\]\]",response[-1]["content"]).group()})
             results.append(instance)
