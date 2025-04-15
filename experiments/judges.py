@@ -8,6 +8,9 @@ import os
 import re
 script_dir = os.path.dirname(os.path.abspath(__file__))
 path.append(os.path.join(script_dir, ".."))
+os.mkdir(os.path.join(script_dir, "..", "data", "judgement"), exist_ok=True)
+os.mkdir(os.path.join(script_dir, "..", "results", "judgement"), exist_ok=True)
+
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
