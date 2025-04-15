@@ -47,7 +47,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
         print("Saving the responses...")
         for response, instance in zip(responses, instances):
             instance.update({"task": task, "assistant": assistant,
-                            "judge": model, "response": response, "score": re.search("\[\[\d+\]\]",response).group()})
+                            "judge": model, "response": response, "score": re.search("\[\[\d+\]\]",response[-1]["content"]).group()})
             results.append(instance)
         if iteration % 10 == 9:
             checkpoint(model, data_file, results)
