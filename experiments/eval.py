@@ -25,11 +25,14 @@ def load_data(data_file: str):
     return data
 
 
-def checkpoint(model: nn.Module, data_file: str, results: List[dict]):
+def checkpoint(model: nn.Module, results: List[dict]):
     result_path = os.path.join(
-        script_dir, "..", "results", "judgement", data_file)
+        script_dir, "..", "results", "judgement", str(model)+"-judgements.json")
+    data = []
+    with open(result_path, "r") as fp:
+        data = json.load(fp)
     with open(result_path, "w") as fp:
-        json.dump(results, fp, indent=4)
+        json.dump(data+results, fp, indent=4)
 
 
 def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 128):
@@ -48,7 +51,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
             
             # min_length == 16
             results.append(instance)
-        checkpoint(model, data_file, results)
+        checkpoint(model, results)
     return results
 
 def evaluate():
@@ -87,8 +90,7 @@ def main(arches: List[int], tasks: Set[int]):
                     else:
                         batch_size = 256
                     print("Starting inference...")
-                    results = run(model, data, data_file, batch_size=batch_size)
-                    checkpoint(model, data_file, results)
+                    run(model, data, data_file, batch_size=batch_size)
 
 
 if __name__ == "__main__":
