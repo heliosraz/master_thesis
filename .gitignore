@@ -179,3 +179,4 @@ secrets.json
 output.txt
 /results
 /shell/output/
+.vscode
