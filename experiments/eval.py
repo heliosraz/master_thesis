@@ -85,7 +85,7 @@ def main(arches: List[int], tasks: Set[int]):
                     if task == 1:
                         batch_size = 512 #256
                     else:
-                        batch_size = 128
+                        batch_size = 256
                     print("Starting inference...")
                     results = run(model, data, data_file, batch_size=batch_size)
                     checkpoint(model, data_file, results)
