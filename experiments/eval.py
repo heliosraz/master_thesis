@@ -29,7 +29,7 @@ def checkpoint(model: nn.Module, results: List[dict]):
     result_path = os.path.join(
         script_dir, "..", "results", "judgement", str(model)+"-judgements.json")
     data = []
-    with open(result_path, "r") as fp:
+    with open(result_path, "r+") as fp:
         data = json.load(fp)
     with open(result_path, "w") as fp:
         json.dump(data+results, fp, indent=4)
