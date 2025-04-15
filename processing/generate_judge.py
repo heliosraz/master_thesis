@@ -33,7 +33,7 @@ def format_task(messages: List[Dict[str, str]]):
     for question, answer in zip(messages[:-1:2], messages[1::2]):
         prompt += QA_TEMPLATE.format(
             question=question["content"].replace("Question:", ""), answer=answer["content"].replace("Answer:", ""))
-    return prompt
+    return [prompt]
 
 
 def generate_task(file_path: str):
