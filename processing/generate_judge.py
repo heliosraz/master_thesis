@@ -42,6 +42,7 @@ def generate_task(file_path: str):
         data = json.load(f)
         for instance in data:
             messages = instance["output"]
+            instance["messages"] = instance["output"]
             instance.pop("output")
             instance["prompt"] = format_task(messages)
             results.append(instance)
