@@ -9,7 +9,7 @@ sys.path.append(os.path.join(script_dir, ".."))
 
 print(os.getcwd())
 script_dir = os.path.dirname(os.path.abspath(__file__))
-SYSTEM_PROMPT = """[System] Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. Begin your evaluation by rating the response on a scale of 1 to 10 by strictly following this format: "[[rating]]", for example: "Rating: [[5]]". Then provide a short explanation, for example: "Explanation:". Be as objective and concise as possible, using as little sentences as possible. \n"""
+SYSTEM_PROMPT = """[System] Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. Your evaluation should be the rating the response on a scale of 1 to 10 by strictly following this format: "[[rating]]", for example: "Rating: [[5]]". On this scale, 1 is for a response that completely does not match and 10 is for a response that is perfect. Please give no justification.\n"""
 
 QA_TEMPLATE = """
 [Question]
