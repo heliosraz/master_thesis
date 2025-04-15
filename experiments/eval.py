@@ -34,7 +34,6 @@ def checkpoint(model: nn.Module, data_file: str, results: List[dict]):
 
 def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 128):
     results = []
-    iteration = 0
     use_tqdm = False
     assistant = "-".join(data_file.split("-")[:-1])
     task = int(data_file.split("-")[-1][4])
@@ -83,7 +82,10 @@ def main(arches: List[int], tasks: Set[int]):
                 if task in tasks:
                     print(f"Running architecture {arch} on file {data_file}")
                     data = load_data(data_file)
-                    batch_size = 128
+                    if task == 1:
+                        batch_size = 512 #256
+                    else:
+                        batch_size = 128
                     print("Starting inference...")
                     results = run(model, data, data_file, batch_size=batch_size)
                     checkpoint(model, data_file, results)
