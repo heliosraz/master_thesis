@@ -43,6 +43,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
         instances = data[start:end]
         responses = model.forward([instance['prompt']
                                   for instance in instances], use_tqdm=use_tqdm)
+        print("Saving the responses...")
         for response, instance in zip(responses, instances):
             instance.update({"task": task, "assistant": assistant,
                             "judge": model, "response": response, "score": re.search("\[\[\d+\]\]",response).group()})
@@ -52,11 +53,25 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
         iteration += 1
     return results
 
+# def evaluate():
+#     record = {task: {arch: {} for arch in ["Llama", "gemma", "Mistral", "DeepSeek"]} for task in range(1, 5)}
+#     result_path = os.path.join(
+#         script_dir, "..", "results", "judgement")
+#     for root, dirs, files in os.walk(result_path):
+#         for fp in files:
+#             assistant = "-".join(fp.split("-")[:-1])
+#             task = int(fp.split("-")[-1][4])
+#             with open(fp, "r") as f:
+#                 data = json.load(f)
+                
+        
+
 
 def main(arches: List[int]):
     data_path = os.path.join(script_dir, "..", "data", "judgement")
-    model = architectures[arch]()
+    
     for arch in arches:
+        model = architectures[arch]()
         for root, dirs, files in os.walk(data_path):
             for data_file in tqdm(files):
                 print(f"Running architecture {arch} on file {data_file}")
