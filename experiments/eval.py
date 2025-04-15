@@ -48,7 +48,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
             print(response[-1]["content"])
             print("###############")
             instance.update({"task": task, "assistant": assistant,
-                            "judge": model, "response": response})
+                            "judge": str(model), "response": response})
             
             # min_length == 16
             results.append(instance)
