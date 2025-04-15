@@ -55,14 +55,13 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
 
 def main(arches: List[int]):
     data_path = os.path.join(script_dir, "..", "data", "judgement")
-
+    model = architectures[arch]()
     for arch in arches:
         for root, dirs, files in os.walk(data_path):
-            for data_file in files:
+            for data_file in tqdm(files):
                 print(f"Running architecture {arch} on file {data_file}")
-                model = architectures[arch]()
                 data = load_data(data_file)
-                batch_size = 32
+                batch_size = 64
                 print("Starting inference...")
                 results = run(model, data, data_file, batch_size=batch_size)
                 checkpoint(model, data_file, results)
