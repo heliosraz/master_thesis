@@ -86,7 +86,7 @@ def sort_tasks():
         for file in files:
             task = int(file.split("-")[-1][4])
             categories[int(task)].append(file)
-    print(categories)
+    # print(categories)
     return categories
         
 
@@ -117,6 +117,6 @@ if __name__ == "__main__":
     else:
         arches = [0, 1, 2, 3]
         tasks = [1,2,3,4]
-    print(arches)
-    print(tasks)
+    # print(arches)
+    # print(tasks)
     main(arches, tasks)
