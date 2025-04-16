@@ -61,7 +61,7 @@ class Llama(nn.Module):
             top_p=0.95,
             max_tokens=100
         )
-        self.llm = LLM(model=model_id, device=device)
+        self.llm = LLM(model=model_id, device=device, max_model_len=700)
         self.model_id = model_id
 
     # def tokenize(self, text: str):
