@@ -56,7 +56,7 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
             
             # min_length == 16
             results.append(instance)
-        checkpoint(model, results, file_name = file_name)
+    checkpoint(model, results, file_name = file_name)
     return results
 
 def evaluate():
