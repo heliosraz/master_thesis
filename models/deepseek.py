@@ -53,7 +53,7 @@ class DeepSeek(nn.Module):
     def __init__(self, model_id: str = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", device: str = "cuda"):
         super(DeepSeek, self).__init__()
         self.params = SamplingParams(
-            top_k=20,
+            top_k=50,
             top_p=0.95,
             max_tokens=100
         )

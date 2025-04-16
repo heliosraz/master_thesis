@@ -57,7 +57,7 @@ class Mistral(nn.Module):
     def __init__(self, model_id: str = "mistralai/Mistral-7B-Instruct-v0.3", device: str = "cuda"):
         super(Mistral, self).__init__()
         self.params = SamplingParams(
-            top_k=20,
+            top_k=50,
             top_p=0.95,
             max_tokens=100
         )
