@@ -80,12 +80,13 @@ def evaluate():
     return record
 
 def sort_tasks():
-    categories = {str(i): [] for i in range(1, 5)}
+    categories = {i: [] for i in range(1, 5)}
     data_path = os.path.join(script_dir, "..", "data", "judgement")
     for root, dirs, files in os.walk(data_path):
         for file in files:
             task = int(file.split("-")[-1][4])
-            categories[task].append(file)
+            categories[int(task)].append(file)
+    print(categories)
     return categories
         
 
@@ -109,13 +110,13 @@ def main(arches: List[int], tasks: Set[int]):
 if __name__ == "__main__":
     if len(argv) == 3:
         arches = [int(argv[1])]
-        tasks = [argv[2]]
+        tasks = [int(argv[2])]
     elif len(argv) == 2:
         arches = [int(argv[1])]
-        tasks = ["1","2","3","4"]
+        tasks = [1,2,3,4]
     else:
         arches = [0, 1, 2, 3]
-        tasks = ["1","2","3","4"]
+        tasks = [1,2,3,4]
     print(arches)
     print(tasks)
     main(arches, tasks)
