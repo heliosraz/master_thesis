@@ -87,9 +87,9 @@ def main(arches: List[int], tasks: Set[int]):
                     print(f"Running architecture {arch} on file {data_file}")
                     data = load_data(data_file)
                     if task == 1:
-                        batch_size = 512 #256
+                        batch_size = 256
                     else:
-                        batch_size = 128
+                        batch_size = 64
                     print("Starting inference...")
                     run(model, data, data_file, batch_size=batch_size)
 

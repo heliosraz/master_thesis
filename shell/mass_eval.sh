@@ -18,7 +18,7 @@ sbatch --job-name=eval2_mistral --output=./shell/output/eval_2_mistral_output.tx
 sbatch --job-name=eval3_mistral --output=./shell/output/eval_3_mistral_output.txt shell/eval.sh 2 3
 sbatch --job-name=eval4_mistral --output=./shell/output/eval_4_mistral_output.txt shell/eval.sh 2 4
 
-sbatch --job-name=eval1_dpseek --partition=gpu48g --output=./shell/output/eval_1_dpseek_output.txt shell/eval.sh 3 1
-sbatch --job-name=eval2_dpseek --partition=gpu48g --output=./shell/output/eval_2_dpseek_output.txt shell/eval.sh 3 2
-sbatch --job-name=eval3_dpseek --partition=gpu48g --output=./shell/output/eval_3_dpseek_output.txt shell/eval.sh 3 3
-sbatch --job-name=eval4_dpseek --partition=gpu48g --output=./shell/output/eval_4_dpseek_output.txt shell/eval.sh 3 4
+sbatch --job-name=eval1_dpseek --output=./shell/output/eval_1_dpseek_output.txt shell/eval.sh 3 1
+sbatch --job-name=eval2_dpseek --output=./shell/output/eval_2_dpseek_output.txt shell/eval.sh 3 2
+sbatch --job-name=eval3_dpseek --output=./shell/output/eval_3_dpseek_output.txt shell/eval.sh 3 3
+sbatch --job-name=eval4_dpseek --output=./shell/output/eval_4_dpseek_output.txt shell/eval.sh 3 4
