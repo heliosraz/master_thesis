@@ -109,13 +109,13 @@ def main(arches: List[int], tasks: Set[int]):
 if __name__ == "__main__":
     if len(argv) == 3:
         arches = [int(argv[1])]
-        tasks = [int(argv[2])]
+        tasks = [argv[2]]
     elif len(argv) == 2:
         arches = [int(argv[1])]
-        tasks = [1,2,3,4]
+        tasks = ["1","2","3","4"]
     else:
         arches = [0, 1, 2, 3]
-        tasks = [1,2,3,4]
+        tasks = ["1","2","3","4"]
     print(arches)
     print(tasks)
     main(arches, tasks)
