@@ -90,33 +90,46 @@ def sort_tasks():
     return categories
         
 
-def main(arches: List[int], tasks: Set[int]):
+def main(arches: List[int], tasks: List[int]=[-1], data_path: str = ""):
     data_files = sort_tasks()
     for arch in arches:
         model = architectures[arch]()
         for task in tasks:
-            files = data_files[task]
-            for data_file in tqdm(files):
-                print(f"Running architecture {arch} on file {data_file}")
-                data = load_data(data_file)
+            if task in data_files:
+                files = data_files[task]
+                for data_file in tqdm(files):
+                    print(f"Running architecture {arch} on file {data_file}")
+                    data = load_data(data_file)
+                    if task == 1:
+                        batch_size = 64
+                    else:
+                        batch_size = 32
+                    print("Starting inference...")
+                    run(model, data, data_file, batch_size=batch_size)
+            elif os.path.isfile(data_path):
+                print(f"Running architecture {arch} on file {data_path}")
+                data = load_data(data_path)
                 if task == 1:
                     batch_size = 64
                 else:
                     batch_size = 32
                 print("Starting inference...")
-                run(model, data, data_file, batch_size=batch_size)
+                run(model, data, data_path, batch_size=batch_size)
 
 
 if __name__ == "__main__":
+    arches = [0, 1, 2, 3]
+    tasks = [-1]
+    file = ""
     if len(argv) == 3:
         arches = [int(argv[1])]
-        tasks = [int(argv[2])]
+        if len(argv[2])>1:
+            file = argv[2]
+        else:
+            tasks = [int(argv[2])]
     elif len(argv) == 2:
         arches = [int(argv[1])]
-        tasks = [1,2,3,4]
-    else:
-        arches = [0, 1, 2, 3]
-        tasks = [1,2,3,4]
+    
     # print(arches)
     # print(tasks)
-    main(arches, tasks)
+    main(arches, tasks, file)
