@@ -17,17 +17,17 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 architectures = [Llama, Gemma, Mistral, DeepSeek]  # distill version
 
 
-def load_data(data_file: str):
-    data_path = os.path.join(script_dir, "..", "data", "judgement", data_file)
+def load_data(file_name: str):
+    data_path = os.path.join(script_dir, "..", "data", "judgement", file_name)
     data = []
     with open(data_path, "r") as fp:
         data = json.load(fp)
     return data
 
 
-def checkpoint(model: nn.Module, task: int, results: List[dict]):
+def checkpoint(model: nn.Module, results: List[dict], file_name: str = ""):
     result_path = os.path.join(
-        script_dir, "..", "results", "judgement", str(model)+f"-taskt{task}-judgements.json")
+        script_dir, "..", "results", "judgement", str(model)+f"-{file_name}-judgements.json")
     data = []
     if os.path.isfile(result_path):
         with open(result_path, "r+") as fp:
@@ -36,11 +36,11 @@ def checkpoint(model: nn.Module, task: int, results: List[dict]):
         json.dump(data+results, fp, indent=4)
 
 
-def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 128):
+def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 128):
     results = []
     use_tqdm = False
-    assistant = "-".join(data_file.split("-")[:-1])
-    task = int(data_file.split("-")[-1][4])
+    assistant = "-".join(file_name.split("-")[:-1])
+    task = int(file_name.split("-")[-1][4])
     for start in tqdm(range(0, len(data), batch_size), desc="Processing batches:"):
         end = start + batch_size
         instances = data[start:end]
@@ -56,7 +56,7 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
             
             # min_length == 16
             results.append(instance)
-        checkpoint(model, task, results)
+        checkpoint(model, results, file_name = file_name)
     return results
 
 def evaluate():
@@ -90,31 +90,32 @@ def sort_tasks():
     return categories
         
 
-def main(arches: List[int], tasks: List[int]=[-1], data_path: str = ""):
+def main(arches: List[int], tasks: List[int]=[-1], file_name: str = ""):
     data_files = sort_tasks()
+    file_path = os.path.join(script_dir, "..", "data", "judgement", file_name)
     for arch in arches:
         model = architectures[arch]()
         for task in tasks:
             if task in data_files:
                 files = data_files[task]
-                for data_file in tqdm(files):
-                    print(f"Running architecture {arch} on file {data_file}")
-                    data = load_data(data_file)
+                for file in tqdm(files):
+                    print(f"Running architecture {arch} on file {file}")
+                    data = load_data(file)
                     if task == 1:
                         batch_size = 64
                     else:
                         batch_size = 32
                     print("Starting inference...")
-                    run(model, data, data_file, batch_size=batch_size)
-            elif os.path.isfile(data_path):
-                print(f"Running architecture {arch} on file {data_path}")
-                data = load_data(data_path)
+                    run(model, data, file, batch_size=batch_size)
+            elif os.path.isfile(file_path):
+                print(f"Running architecture {arch} on file {file_name}")
+                data = load_data(file_name)
                 if task == 1:
                     batch_size = 64
                 else:
                     batch_size = 32
                 print("Starting inference...")
-                run(model, data, data_path, batch_size=batch_size)
+                run(model, data, file_name, batch_size=batch_size)
 
 
 if __name__ == "__main__":
