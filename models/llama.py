@@ -57,7 +57,7 @@ class Llama(nn.Module):
     def __init__(self, model_id: str = "meta-llama/Llama-3.2-3B-Instruct", device: str = "cuda"):
         super(Llama, self).__init__()
         self.params = SamplingParams(
-            top_k=50,
+            top_k=20,
             top_p=0.95,
             max_tokens=100
         )

@@ -54,7 +54,7 @@ class Gemma(nn.Module):
     def __init__(self, model_id: str = "google/gemma-3-4b-it", device: str = "cuda"):
         super(Gemma, self).__init__()
         self.params = SamplingParams(
-            top_k=50,
+            top_k=20,
             top_p=0.95,
             max_tokens=100
         )
