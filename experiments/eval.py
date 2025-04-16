@@ -44,8 +44,12 @@ def run(model: nn.Module, data: List[dict], data_file: str, batch_size: int = 12
     for start in tqdm(range(0, len(data), batch_size), desc="Processing batches:"):
         end = start + batch_size
         instances = data[start:end]
-        responses = model.forward([instance['prompt']
-                                  for instance in instances], use_tqdm=use_tqdm)
+        try:
+            responses = model.forward([instance['prompt']
+                                    for instance in instances], use_tqdm=use_tqdm)
+        except Exception as e:
+                print(f"Error during model.forward: {e}")
+                continue
         for response, instance in zip(responses, instances):
             instance.update({"task": task, "assistant": assistant,
                             "judge": str(model), "response": response})
@@ -87,9 +91,9 @@ def main(arches: List[int], tasks: Set[int]):
                     print(f"Running architecture {arch} on file {data_file}")
                     data = load_data(data_file)
                     if task == 1:
-                        batch_size = 256
-                    else:
                         batch_size = 64
+                    else:
+                        batch_size = 32
                     print("Starting inference...")
                     run(model, data, data_file, batch_size=batch_size)
 
