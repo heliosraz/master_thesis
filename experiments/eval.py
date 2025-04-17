@@ -25,9 +25,10 @@ def load_data(file_name: str):
     return data
 
 
-def checkpoint(model: nn.Module, results: List[dict], file_name: str = ""):
+def checkpoint(model: nn.Module, results: List[dict], task: int):
     result_path = os.path.join(
-        script_dir, "..", "results", "judgement", str(model)+f"-{file_name}-judgements.json")
+        script_dir, "..", "results", "judgement", 
+        f"{str(model)}-task{task}-judgements.json")
     data = []
     if os.path.isfile(result_path):
         with open(result_path, "r+") as fp:
@@ -56,7 +57,7 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
             
             # min_length == 16
             results.append(instance)
-    checkpoint(model, results, file_name = file_name)
+    checkpoint(model, results, task)
     return results
 
 def evaluate():
