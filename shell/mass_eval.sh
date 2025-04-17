@@ -35,11 +35,6 @@ sbatch --job-name=eval1_gemma_12 --output=./shell/output/eval_1_gemma_gemma12_ou
 sbatch --job-name=eval1_mistral_12 --output=./shell/output/eval_1_mistral_gemma12_output.txt shell/eval.sh 2 gemma-3-12b-it-task1.json
 sbatch --job-name=eval1_dpseek_12 --output=./shell/output/eval_1_dpseek_gemma12_output.txt shell/eval.sh 3 gemma-3-12b-it-task1.json
 
-sbatch --job-name=eval1_llama_4 --output=./shell/output/eval_1_llama_gemma4_output.txt shell/eval.sh 0 gemma-3-4b-it-task1.json
-sbatch --job-name=eval1_gemma_4 --output=./shell/output/eval_1_gemma_gemma4_output.txt shell/eval.sh 1 gemma-3-4b-it-task1.json
-sbatch --job-name=eval1_mistral_4 --output=./shell/output/eval_1_mistral_gemma4_output.txt shell/eval.sh 2 gemma-3-4b-it-task1.json
-sbatch --job-name=eval1_dpseek_4 --output=./shell/output/eval_1_dpseek_gemma4_output.txt shell/eval.sh 3 gemma-3-4b-it-task1.json
-
 sbatch --job-name=eval1_llama_llama --output=./shell/output/eval_1_llama_llama_output.txt shell/eval.sh 0 Llama-3.2-3B-Instruct-task1.json
 sbatch --job-name=eval1_gemma_llama --output=./shell/output/eval_1_gemma_llama_output.txt shell/eval.sh 1 Llama-3.2-3B-Instruct-task1.json
 sbatch --job-name=eval1_mistral_llama --output=./shell/output/eval_1_mistral_llama_output.txt shell/eval.sh 2 Llama-3.2-3B-Instruct-task1.json
