@@ -116,6 +116,6 @@ if __name__ == "__main__":
     elif len(argv) == 2:
         arches = [int(argv[1])]
     
-    # print(arches)
-    # print(tasks)
+    print(arches)
+    print(tasks)
     main(arches, tasks, file)
