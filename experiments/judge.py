@@ -70,7 +70,7 @@ def sort_tasks():
     for root, dirs, files in os.walk(data_path):
         for file in files:
             print(file)
-            task = int(file.split("-")[-2][4])
+            task = int(file.split("-")[-1][4])
             categories[int(task)].append(file)
     # print(categories)
     return categories
