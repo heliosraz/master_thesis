@@ -11,7 +11,7 @@ sys.path.append(os.path.join(script_dir, ".."))
 
 print(os.getcwd())
 script_dir = os.path.dirname(os.path.abspath(__file__))
-SYSTEM_PROMPT = """[System] Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. Please rate each evaluation on a scale of 1 to 10. On this scale, 1 is for a response that completely does not match and 10 is for a response that is perfect. The beginning of your evaluation must be your rating by strictly following this format: "[[rating]]", for example: "Rating: [[5]]". After the rating, provide a short explanation. Be as objective and concise as possible, using as little sentences as possible. Please follow the format exactly and make sure your response include your rating above all else.\n For example: \n\n Rating: [[6]] \n\nExplanation: \nThe response provides a list of possible substitutions for \"minister\" but lacks a clear explanation for why each option is incorrect. The best answer is missing (answer \"C\"). While the final answer is somewhat relevant to the context, it may not necessarily provide the most accurate or helpful substitution for \"minister\", and the reasoning behind the other options is lacking."""
+SYSTEM_PROMPT = """[System] Please act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. Your evaluation should consider factors such as the helpfulness, relevance, accuracy, depth, creativity, and level of detail of the response. Please rate each evaluation on a scale of 1 to 10. On this scale, 1 is for a response that completely does not match and 10 is for a response that is perfect. The beginning of your evaluation must be your rating by strictly following this format: "[[rating]]", for example: "Rating: [[5]]". After the rating, provide a short explanation. Be as objective and concise as possible, using as little sentences as possible. Please follow the format exactly and make sure your response include your rating above all else.\n For example, your answer should look like this: \n\n Rating: [[6]] \n\nExplanation: \nThe response provides a list of possible substitutions for \"minister\" but lacks a clear explanation for why each option is incorrect. The best answer is missing (answer \"C\"). While the final answer is somewhat relevant to the context, it may not necessarily provide the most accurate or helpful substitution for \"minister\", and the reasoning behind the other options is lacking."""
 
 QA_TEMPLATE = """
 [Question]
@@ -60,8 +60,8 @@ def main(data_file: str = ""):
         fp = os.path.join(script_dir, "..", "results", data_file)
         generate_task(fp)
     else:
-        for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results")):
-            for f in tqdm(files):
+        for f in tqdm(os.listdir(os.path.join(script_dir, "..", "results"))):
+            if f.endswith(".json"):
                 fp = os.path.join(script_dir, "..", "results", f)
                 prompts = generate_task(file_path=fp)
                 save(model_task = f, prompts = prompts)
