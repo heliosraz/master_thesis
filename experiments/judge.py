@@ -8,6 +8,7 @@ from tqdm import tqdm
 from typing import List, Set
 import json
 import re
+import eval
 
 os.makedirs(os.path.join(script_dir, "..", "data", "judgement"), exist_ok=True)
 os.makedirs(os.path.join(script_dir, "..", "results", "judgement"), exist_ok=True)
@@ -52,6 +53,9 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
                 print(f"Error during model.forward: {e}")
                 continue
         for response, instance in zip(responses, instances):
+            if not eval.find_score(response):
+                print(response)
+                raise Exception("Response contains no score")
             instance.update({"task": task, "assistant": assistant,
                             "judge": str(model), "response": response})
             
@@ -59,26 +63,6 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
             results.append(instance)
     checkpoint(model, results, task)
     return results
-
-def evaluate():
-    record = {task: {} for task in range(1, 5)}
-    result_path = os.path.join(
-        script_dir, "..", "results", "judgement")
-    for root, dirs, files in os.walk(result_path):
-        for fp in files:
-            task = int(fp.split("-")[-1][4])
-            assistant = "-".join(fp.split("-")[:-1])
-            if assistant not in record[task]:
-                record[task][assistant] = {}
-            with open(fp, "r") as f:
-                data = json.load(f)
-                data = [(instance["word"], int(re.search("\d+",instance["score"]).group())) for instance in data]
-                for word, score in data:
-                    if word not in record[task][assistant]:
-                        record[task][assistant][word] = (score, 1)
-                    else:
-                        record[task][assistant][word] = (record[task][assistant][word][0]+score, record[task][assistant][word][1]+1)
-    return record
 
 def sort_tasks():
     categories = {i: [] for i in range(1, 5)}
