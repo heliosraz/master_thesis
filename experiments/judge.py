@@ -53,8 +53,8 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
                 print(f"Error during model.forward: {e}")
                 continue
         for response, instance in zip(responses, instances):
-            if not eval.find_score(response):
-                print(response)
+            if not eval.find_score(response[-1]['content']):
+                print(response[-1]['content'])
                 raise Exception("Response contains no score")
             instance.update({"task": task, "assistant": assistant,
                             "judge": str(model), "response": response})
