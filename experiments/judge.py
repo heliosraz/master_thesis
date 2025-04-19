@@ -43,9 +43,10 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
     use_tqdm = False
     assistant = "-".join(file_name.split("-")[:-1])
     task = int(file_name.split("-")[-1][4])
-    for start in tqdm(range(0, len(data), batch_size), desc="Processing batches:"):
-        end = start + batch_size
-        instances = data[start:end]
+    progress_bar = tqdm(total=len(data), desc="Processing batches:")
+    while data:
+        instances = data[:batch_size]
+        data = data[batch_size:]
         try:
             responses = model.forward([instance['prompt']
                                     for instance in instances], use_tqdm=use_tqdm)
@@ -53,14 +54,11 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
                 print(f"Error during model.forward: {e}")
                 continue
         for response, instance in zip(responses, instances):
-            if not eval.find_score(response[-1]['content']):
-                print(response[-1]['content'])
-                raise Exception("Response contains no score")
-            instance.update({"task": task, "assistant": assistant,
+            if eval.find_score(response[-1]['content']):
+                instance.update({"task": task, "assistant": assistant,
                             "judge": str(model), "response": response})
-            
-            # min_length == 16
-            results.append(instance)
+                progress_bar.update(1)
+                results.append(instance)
     checkpoint(model, results, task)
     return results
 
@@ -69,7 +67,6 @@ def sort_tasks():
     data_path = os.path.join(script_dir, "..", "data", "judgement")
     for root, dirs, files in os.walk(data_path):
         for file in files:
-            print(file)
             task = int(file.split("-")[-1][4])
             categories[int(task)].append(file)
     # print(categories)
