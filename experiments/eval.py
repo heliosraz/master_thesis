@@ -17,35 +17,53 @@ def find_score(response: str):
         rating = fallback.group(1) if fallback else None
     return rating
 
-def evaluate():
+def evaluate(file_name: str = ""):
     fail_count = 0
     record = {task: {judge: {assist: {} for assist in models} for judge in models} for task in range(1, 5)}
     fails = {judge: 0 for judge in models}
-    result_path = os.path.join(
-        script_dir, "..", "results", "judgement")
-    for root, dirs, files in os.walk(result_path):
-        for fp in tqdm(files):
-            if not fp.endswith(".json"):
-                continue
-            fp = os.path.join(result_path, fp)
-            with open(fp, "r") as f:
-                data = json.load(f)
-                for instance in data:
-                    task = int(instance["task"])
-                    judge = instance["judge"]
-                    assistant = instance["assistant"]
-                    word = instance["word"]
-                    rating = find_score(instance["response"][-1]["content"])
-                    if not rating:
-                        fail_count += 1
-                    if word not in record[task][judge][assistant]:
-                        record[task][judge][assistant][word] = (0, 0)
-                    if rating:
-                        record[task][judge][assistant][word] = (record[task][judge][assistant][word][0]+int(rating), record[task][judge][assistant][word][1]+1)
-                    else:
-                        fails[judge] += 1
-    print(record)
-    print(fails)
+    if file_name:
+        with open(fp, "r") as f:
+            data = json.load(f)
+            for instance in data:
+                task = int(instance["task"])
+                judge = instance["judge"]
+                assistant = instance["assistant"]
+                word = instance["word"]
+                rating = find_score(instance["response"][-1]["content"])
+                if not rating:
+                    fail_count += 1
+                if word not in record[task][judge][assistant]:
+                    record[task][judge][assistant][word] = (0, 0)
+                if rating:
+                    record[task][judge][assistant][word] = (record[task][judge][assistant][word][0]+int(rating), record[task][judge][assistant][word][1]+1)
+                else:
+                    fails[judge] += 1
+    else:
+        result_path = os.path.join(
+            script_dir, "..", "results", "judgement")
+        for root, dirs, files in os.walk(result_path):
+            for fp in tqdm(files):
+                if not fp.endswith(".json"):
+                    continue
+                fp = os.path.join(result_path, fp)
+                with open(fp, "r") as f:
+                    data = json.load(f)
+                    for instance in data:
+                        task = int(instance["task"])
+                        judge = instance["judge"]
+                        assistant = instance["assistant"]
+                        word = instance["word"]
+                        rating = find_score(instance["response"][-1]["content"])
+                        if not rating:
+                            fail_count += 1
+                        if word not in record[task][judge][assistant]:
+                            record[task][judge][assistant][word] = (0, 0)
+                        if rating:
+                            record[task][judge][assistant][word] = (record[task][judge][assistant][word][0]+int(rating), record[task][judge][assistant][word][1]+1)
+                        else:
+                            fails[judge] += 1
+    # print(record)
+    # print(fails)
     return record
 
 if __name__ == "__main__":
