@@ -54,11 +54,15 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
                 print(f"Error during model.forward: {e}")
                 continue
         for response, instance in zip(responses, instances):
+            if "repeat" not in instance:
+                instance["repeat"] = 0
             if eval.find_score(response[-1]['content']):
                 instance.update({"task": task, "assistant": assistant,
                             "judge": str(model), "response": response})
                 progress_bar.update(1)
                 results.append(instance)
+            else:
+                instance["repeat"] += 1
     checkpoint(model, results, task)
     return results
 

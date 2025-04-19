@@ -9,11 +9,11 @@ import sys
 models = {'Llama-3.2-3B-Instruct', 'Mistral-7B-Instruct-v0.3', 'gemma-3-4b-it', 'gemma-3-12b-it', 'DeepSeek-R1-Distill-Llama-8B'}
 
 def find_score(response: str):
-    rating_match = re.search(r"Rating:\s*\[*\s*(\d{1,2})\s*\]*", response)
+    rating_match = re.search(r"Rating:\s*(?<!\d)\[*\s*(10|[1-9])\s*\]*(?!\d|\.)", response)
     if rating_match:
         rating = rating_match.group(1)
     else:
-        fallback = re.search(r"\[*\s*(\d{1,2})\s*\]*", response)
+        fallback = re.search(r"(?<!\d)\[*\s*(10|[1-9])\s*\]*(?!\d|\.)", response)
         rating = fallback.group(1) if fallback else None
     return rating
 
