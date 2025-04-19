@@ -22,6 +22,8 @@ def evaluate(file_name: str = ""):
     record = {task: {judge: {assist: {} for assist in models} for judge in models} for task in range(1, 5)}
     fails = {judge: 0 for judge in models}
     if file_name:
+        fp = os.path.join(
+            script_dir, "..", "results", "judgement", file_name)
         with open(fp, "r") as f:
             data = json.load(f)
             for instance in data:
