@@ -43,7 +43,7 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
     use_tqdm = False
     assistant = "-".join(file_name.split("-")[:-1])
     task = int(file_name.split("-")[-1][4])
-    progress_bar = tqdm(total=len(data), desc="Processing batches:")
+    progress_bar = tqdm(total=len(data), desc="Processing Instances:")
     while data:
         instances = data[:batch_size]
         data = data[batch_size:]
@@ -56,13 +56,15 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
         for response, instance in zip(responses, instances):
             if "repeat" not in instance:
                 instance["repeat"] = 0
-            if eval.find_score(response[-1]['content']):
+            rating = eval.find_score(response[-1]['content'])
+            if rating:
                 instance.update({"task": task, "assistant": assistant,
                             "judge": str(model), "response": response})
                 progress_bar.update(1)
                 results.append(instance)
             else:
                 instance["repeat"] += 1
+                data.append(instance)
     checkpoint(model, results, task)
     return results
 
