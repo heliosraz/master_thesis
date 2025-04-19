@@ -69,7 +69,7 @@ def sort_tasks():
     data_path = os.path.join(script_dir, "..", "data", "judgement")
     for root, dirs, files in os.walk(data_path):
         for file in files:
-            task = int(file.split("-")[-1][4])
+            task = int(file.split("-")[-2][4])
             categories[int(task)].append(file)
     # print(categories)
     return categories
