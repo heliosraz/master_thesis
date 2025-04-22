@@ -23,13 +23,10 @@ def load_data(root, filename: str):
         data = json.load(fp)
     return data
 
-def checkpoint(model:nn.Module, data: List[dict], tok_results: List[dict], def_results: List[dict]):
+def checkpoint(model:nn.Module, data: List[dict]):
     data_path = os.path.join(script_dir, "..", "results", "embed", f"{str(model)}-embeds.json")
     with open(data_path, "w") as fp:
         json.dump(data, fp, indent=4)
-
-def cluster():
-    pass
 
 def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task = "token"):
     for start in tqdm(range(0, len(data), batch_size), desc="Processing batches"):
@@ -61,9 +58,17 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
                     raise Exception("Didn't get embedding")
             
         elif task == "definition":
-            embeddings = model.encode([instance["definition"] for instance in instances])
+            embeddings = model.encode([instance[task] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
                 instance.update({"definition_embedding": embedding})
+        elif task == "response":
+            embeddings = model.encode([instance["output"][1]["content"] for instance in instances], use_tqdm = False)
+            for instance, embedding in zip(instances, embeddings):
+                instance.update({"response_embedding": embedding})
+        elif task == "prompt":
+            embeddings = model.encode([instance["prompt"][0] for instance in instances], use_tqdm = False)
+            for instance, embedding in zip(instances, embeddings):
+                instance.update({"prompt_embedding": embedding})
 
 if __name__ == "__main__":
     if len(argv) == 1:
@@ -83,22 +88,24 @@ if __name__ == "__main__":
                 batch_size = 32
                 print("Starting embedding...")
                 run(tok_model, tokenizer, data, batch_size=batch_size)
-                run(def_model, tokenizer, data, batch_size=batch_size, task = "definition")
                 checkpoint(def_model, data)
-    for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "tasks")):
+    for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results", "task")):
         data = []
         for fn in files:
             for arch in arches:
                 print(f"Running architecture {arch}...")
-                def_model = architectures[arch](device = "auto", task = "embed")
-                tok_model = AutoModel.from_pretrained(def_model.model_id)
-                tokenizer = AutoTokenizer.from_pretrained(def_model.model_id)
+                embed_model = architectures[arch](device = "auto", task = "embed")
+                word_model = AutoModel.from_pretrained(embed_model.model_id)
+                tokenizer = AutoTokenizer.from_pretrained(embed_model.model_id)
                 tokenizer.pad_token = tokenizer.eos_token
                 data = load_data(root, fn)
                 batch_size = 32
                 print("Starting embedding...")
-                run(tok_model, tokenizer, data, batch_size=batch_size)
-                run(def_model, tokenizer, data, batch_size=batch_size, task = "definition")
-                checkpoint(def_model, data)
+                # run(word_model, tokenizer, data, batch_size=batch_size)
+                run(embed_model.llm, tokenizer, data, batch_size=batch_size, task = "definition")
+                run(embed_model.llm, tokenizer, data, batch_size=batch_size, task = "prompt")
+                run(embed_model.llm, tokenizer, data, batch_size=batch_size, task = "response")
+                
+                checkpoint(embed_model, data)
         
 
