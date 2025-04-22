@@ -57,7 +57,7 @@ def run(model: nn.Module, data: List[dict], file_name: str, batch_size: int = 12
             if "repeat" not in instance:
                 instance["repeat"] = 0
             rating = eval.find_score(response[-1]['content'])
-            if rating or instance["repeat"] >= 100:
+            if rating or instance["repeat"] >= 25:
                 instance.update({"task": task, "assistant": assistant,
                             "judge": str(model), "response": response})
                 progress_bar.update(1)
