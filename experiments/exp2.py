@@ -49,7 +49,7 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
                 for embedding, token in zip(embeddings, tokens):
                     token = token.replace(u"\u0120", "").replace(u"\u0121", "")
                     try:
-                        if re.compile(token).match(instance["word"]) or re.compile(instance["word"]).match(token):
+                        if re.compile(token).match(instance["word"]) or instance["word"] in token:
                             instance.update({"token_embedding": embedding})
                             added = True
                             break
