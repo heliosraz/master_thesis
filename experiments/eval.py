@@ -20,7 +20,7 @@ def find_score(response: str):
     rating_match = re.search(
         r"Rating:\s*(?<!\d)\[*\s*(10|[1-9])\s*\]*(?!\d|\.)", response)
     if rating_match:
-        if rating_match.groups():
+        if len(rating_match.groups())>1:
             print(rating_match.groups())
         rating = rating_match.group(1)
     else:
