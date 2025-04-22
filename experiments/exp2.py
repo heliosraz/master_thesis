@@ -90,7 +90,7 @@ if __name__ == "__main__":
                 print("Starting embedding...")
                 run(tok_model, tokenizer, data, batch_size=batch_size)
                 token_embeddings[arch] = {instance["prompt"][0]: instance["token_embedding"] for instance in data}
-                checkpoint(model_ids[arch], data)
+                checkpoint(model_ids[arch].split("/")[-1], data)
     
     for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results", "task")):
         data = []
