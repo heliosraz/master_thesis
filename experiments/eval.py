@@ -110,14 +110,14 @@ def plot_1(results):
                     limit = max(x+y)
                     ax.plot([0, limit], [0, limit], '--',
                             color='gray', linewidth=1, zorder=0)
-                    ax.scatter(x, y, color=color_map[assistant], s=1, label="-".join(assistant.split("-")[:3]).capitalize())
+                    ax.scatter(x, y, color=color_map[assistant], s=1, label='-'.join(assistant.split('-')[:3]).capitalize())
                     m, b = np.polyfit(x, y, 1)
                     
                     ax.plot(x, [m*coord+b for coord in x],
                             "--", color=color_map[assistant], linewidth=1.0 )
 
                     if row == len(results[task]) - 1:
-                        ax.set_xlabel(f"Judge:\n{"-".join(judge.split("-")[:3]).capitalize()}", fontsize=9)
+                        ax.set_xlabel(f"Judge:\n{'-'.join(judge.split('-')[:3]).capitalize()}", fontsize=9)
                     if col == 0:
                         ax.set_ylabel(f"Task:\n{task}", fontsize=9)
                     
@@ -164,9 +164,9 @@ def plot_2(results):
                             "--", color=color_map[task], linewidth=1.0 )
 
                     if row == len(assistants) - 1:
-                        ax.set_xlabel(f"Judge:\n{"-".join(judge.split("-")[:3]).capitalize()}", fontsize=9)
+                        ax.set_xlabel(f"Judge:\n{'-'.join(judge.split('-')[:3]).capitalize()}", fontsize=9)
                     if col == 0:
-                        ax.set_ylabel(f"Assistant:\n{"-".join(assistant.split("-")[:3]).capitalize()}", fontsize=9)
+                        ax.set_ylabel(f"Assistant:\n{'-'.join(assistant.split('-')[:3]).capitalize()}", fontsize=9)
                     
                     slopes[task][judge][assistant].update({"m":m, "b":b})
                     
