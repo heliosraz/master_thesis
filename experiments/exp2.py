@@ -7,40 +7,98 @@ path.append(os.path.join(script_dir, ".."))
 from tqdm import tqdm
 from models import Llama, Mistral, Gemma, DeepSeek
 from torch import nn
-
-
+from transformers import AutoTokenizer, AutoModel
+import torch
+import re
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
+architectures = [Llama, Gemma, Mistral, DeepSeek]
+os.makedirs(os.path.join(script_dir, "..", "results", "embed"), exist_ok=True)
 
-architectures = [Llama, Gemma, Mistral, DeepSeek] #distill version
-
-
-def load_data(filename: str):
-    data_path = os.path.join(script_dir, "..", "results", filename)
+def load_data(root, filename: str):
+    file_path = os.path.join(root, filename)
     data = []
-    with open(data_path, "r") as fp:
+    with open(file_path, "r") as fp:
         data = json.load(fp)
     return data
+
+def checkpoint(model:nn.Module, data: List[dict], tok_results: List[dict], def_results: List[dict]):
+    data_path = os.path.join(script_dir, "..", "results", "embed", f"{str(model)}-embeds.json")
+    with open(data_path, "w") as fp:
+        json.dump(data, fp, indent=4)
 
 def cluster():
     pass
 
-def run(model:nn.Module, data: List[dict], task: int):
-    results = []
-    for instance in tqdm(data):
-        print(model.encode(instance['prompt']), model.tokenizer(instance["prompt"]))
-    return results
+def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task = "token"):
+    for start in tqdm(range(0, len(data), batch_size), desc="Processing batches"):
+        end = start + batch_size
+        instances = data[start:end]
+        if task == "token":
+            inputs = tokenizer([instance["prompt"][0] for instance in instances], return_tensors="pt", padding=True, truncation=True)
+            batch_tokens = []
+            for input_ids in inputs["input_ids"]:
+                batch_tokens += [tokenizer.convert_ids_to_tokens(input_ids)]
+
+            with torch.no_grad():
+                outputs = model(**inputs)
+
+            batch_contextual_embed = outputs.last_hidden_state
+            
+            for instance, embeddings, tokens in zip(instances, batch_contextual_embed, batch_tokens):
+                added = False
+                for embedding, token in zip(embeddings, tokens):
+                    token = token.replace(u"\u0120", "").replace(u"\u0121", "")
+                    try:
+                        if re.compile(token).match(instance["word"]) or re.compile(instance["word"]).match(token):
+                            instance.update({"token_embedding": embedding})
+                            added = True
+                            break
+                    except re.error:
+                        continue
+                if not added:
+                    raise Exception("Didn't get embedding")
+            
+        elif task == "definition":
+            embeddings = model.encode([instance["definition"] for instance in instances])
+            for instance, embedding in zip(instances, embeddings):
+                instance.update({"definition_embedding": embedding})
 
 if __name__ == "__main__":
-    for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results")):
-        arch = ""
+    if len(argv) == 1:
+        arches = [0, 1, 2]
+    else:
+        arches = [int(argv[1])]
+    for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "embed")):
         data = []
-        for f in files:
-            if arch and arch == f.split("-")[0]:
-                print(f"Running architecture {arch}")
-                model = architectures[arch](device="mps")
-                data = load_data(f)
-                results = run(model, data, task)
+        for fn in files:
+            for arch in arches:
+                print(f"Running architecture {arch}...")
+                def_model = architectures[arch](device = "auto", task = "embed")
+                tok_model = AutoModel.from_pretrained(def_model.model_id)
+                tokenizer = AutoTokenizer.from_pretrained(def_model.model_id)
+                tokenizer.pad_token = tokenizer.eos_token
+                data = load_data(fn)
+                batch_size = 32
+                print("Starting embedding...")
+                run(tok_model, tokenizer, data, batch_size=batch_size)
+                run(def_model, tokenizer, data, batch_size=batch_size, task = "definition")
+                checkpoint(def_model, data)
+    for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "tasks")):
+        data = []
+        for fn in files:
+            for arch in arches:
+                print(f"Running architecture {arch}...")
+                def_model = architectures[arch](device = "auto", task = "embed")
+                tok_model = AutoModel.from_pretrained(def_model.model_id)
+                tokenizer = AutoTokenizer.from_pretrained(def_model.model_id)
+                tokenizer.pad_token = tokenizer.eos_token
+                data = load_data(root, fn)
+                batch_size = 32
+                print("Starting embedding...")
+                run(tok_model, tokenizer, data, batch_size=batch_size)
+                run(def_model, tokenizer, data, batch_size=batch_size, task = "definition")
+                checkpoint(def_model, data)
         
 
