@@ -14,6 +14,7 @@ import re
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 architectures = [Llama, Gemma, Mistral, DeepSeek]
+model_ids = {0: "meta-llama/Llama-3.2-3B-Instruct", 1: "google/gemma-3-4b-it", 2: "mistralai/Mistral-7B-Instruct-v0.3", 3: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"}
 os.makedirs(os.path.join(script_dir, "..", "results", "embed"), exist_ok=True)
 
 def load_data(root, filename: str):
@@ -72,32 +73,31 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
 
 if __name__ == "__main__":
     if len(argv) == 1:
-        arches = [0, 1, 2]
+        arches = [0, 1, 2, 3]
     else:
         arches = [int(argv[1])]
     for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "embed")):
         data = []
-        for fn in files:
-            for arch in arches:
+        for arch in arches:
+            tok_model = AutoModel.from_pretrained(model_ids[arch])
+            tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
+            tokenizer.pad_token = tokenizer.eos_token
+            for fn in files:
                 print(f"Running architecture {arch}...")
-                def_model = architectures[arch](device = "auto", task = "embed")
-                tok_model = AutoModel.from_pretrained(def_model.model_id)
-                tokenizer = AutoTokenizer.from_pretrained(def_model.model_id)
-                tokenizer.pad_token = tokenizer.eos_token
-                data = load_data(fn)
+                data = load_data(root, fn)
                 batch_size = 32
                 print("Starting embedding...")
                 run(tok_model, tokenizer, data, batch_size=batch_size)
-                checkpoint(def_model, data)
+                checkpoint(model_ids[arch], data)
     for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results", "task")):
         data = []
-        for fn in files:
-            for arch in arches:
+        for arch in arches:
+            embed_model = architectures[arch](device = "auto", task = "embed")
+            word_model = AutoModel.from_pretrained(embed_model.model_id)
+            tokenizer = AutoTokenizer.from_pretrained(embed_model.model_id)
+            tokenizer.pad_token = tokenizer.eos_token
+            for fn in files:
                 print(f"Running architecture {arch}...")
-                embed_model = architectures[arch](device = "auto", task = "embed")
-                word_model = AutoModel.from_pretrained(embed_model.model_id)
-                tokenizer = AutoTokenizer.from_pretrained(embed_model.model_id)
-                tokenizer.pad_token = tokenizer.eos_token
                 data = load_data(root, fn)
                 batch_size = 32
                 print("Starting embedding...")
