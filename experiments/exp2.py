@@ -50,7 +50,7 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
                     token = token.replace(u"\u0120", "").replace(u"\u0121", "")
                     try:
                         if re.compile(token).match(instance["word"]) or instance["word"] in token:
-                            instance.update({"token_embedding": embedding})
+                            instance.update({"token_embedding": embedding.tolist()})
                             added = True
                             break
                     except re.error:
@@ -62,15 +62,15 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
         elif task == "definition":
             embeddings = model.encode([instance[task] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
-                instance.update({"definition_embedding": embedding})
+                instance.update({"definition_embedding": embedding.tolist()})
         elif task == "response":
             embeddings = model.encode([instance["output"][1]["content"] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
-                instance.update({"response_embedding": embedding})
+                instance.update({"response_embedding": embedding.tolist()})
         elif task == "prompt":
             embeddings = model.encode([instance["prompt"][0] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
-                instance.update({"prompt_embedding": embedding})
+                instance.update({"prompt_embedding": embedding.tolist()})
 
 if __name__ == "__main__":
     if len(argv) == 1:
