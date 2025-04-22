@@ -4,9 +4,13 @@ import json
 import os
 import itertools
 import pandas as pd
-from sys import argv
+from sys import argv, path
 
 print(os.getcwd())
+script_dir = os.path.dirname(os.path.abspath(__file__))
+path.append(os.path.join(script_dir, ".."))
+os.makedirs(os.path.join(script_dir, "..", "data", "judgement"), exist_ok=True)
+os.makedirs(os.path.join(script_dir, "..", "data", "tasks"), exist_ok=True)
 
 
 class DataInstance():
@@ -89,8 +93,8 @@ def process_nltk():
 
     nouns = set([n.name().split(".")[0] for n in list(wn.all_synsets('n'))
                 if n.name().split(".")[0] in most_common and "_" not in n.name()])
-    with open("./data/corpora/nouns.txt", "w") as fp:
-        print(nouns, file=fp)
+    with open("./data/corpora/nouns.json", "w") as fp:
+        json.dump(list(nouns), fp=fp)
 
 
 def main(task: int = -1):
@@ -101,7 +105,7 @@ def main(task: int = -1):
         
     process_nltk()
 
-    with open("./data/corpora/nouns.txt", "w") as fp:
+    with open("./data/corpora/nouns.json", "r") as fp:
         nouns = json.load(fp)
 
     for task in tasks:
