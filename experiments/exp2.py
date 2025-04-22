@@ -56,6 +56,7 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
                     except re.error:
                         continue
                 if not added:
+                    print([token.replace(u"\u0120", "").replace(u"\u0121", "") for token in tokens], instance["word"])
                     raise Exception("Didn't get embedding")
             
         elif task == "definition":
