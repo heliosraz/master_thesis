@@ -83,7 +83,7 @@ if __name__ == "__main__":
     
     for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "embed")):
         for arch in arches:
-            result_path = os.path.join(script_dir, "..", "results", "embed", f"{model_ids[arch].split("/")[-1]}-embeds.json")
+            result_path = os.path.join(script_dir, "..", "results", "embed", f"{model_ids[arch].split('/')[-1]}-embeds.json")
             if os.path.isfile(result_path):
                 with open(result_path, "r+") as fp:
                     data = json.load(fp)
