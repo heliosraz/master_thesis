@@ -50,14 +50,16 @@ import torch
 from vllm import LLM, SamplingParams
 
 class DeepSeek(nn.Module):
-    def __init__(self, model_id: str = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", device: str = "cuda"):
+    def __init__(self, model_id: str = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", device: str = "cuda", model_len: int = 700, **kwargs):
         super(DeepSeek, self).__init__()
         self.params = SamplingParams(
             top_k=50,
             top_p=0.95,
             max_tokens=100
         )
-        self.llm = LLM(model=model_id, device=device, max_model_len=700)
+        self.model_id = model_id
+        llm_params = {k: val for k, val in kwargs.items()}
+        self.llm = LLM(model=model_id, device=device, max_model_len=model_len, **llm_params)
         self.model_id = model_id
 
     # def tokenize(self, text: str):

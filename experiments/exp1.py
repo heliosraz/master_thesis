@@ -13,6 +13,7 @@ from torch import nn
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
 architectures = [Llama, Gemma, Mistral, DeepSeek] #distill version
+os.makedirs(os.path.join(script_dir, "..", "results", "task"), exist_ok=True)
 
 
 def load_data(task:int):
@@ -23,7 +24,7 @@ def load_data(task:int):
     return data
 
 def checkpoint(model:nn.Module, i: int, results: List[dict]):
-    data_path = os.path.join(script_dir, "..", "results", f"{str(model)}-task{i}.json")
+    data_path = os.path.join(script_dir, "..", "results", "task", f"{str(model)}-task{i}.json")
     with open(data_path, "w") as fp:
         json.dump(results, fp, indent=4)
 
