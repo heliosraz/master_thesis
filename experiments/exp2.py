@@ -62,15 +62,16 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
         elif task == "definition":
             embeddings = model.encode([instance[task] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
-                instance.update({"definition_embedding": embedding.tolist()})
+                instance.update({"definition_embedding": embedding.outputs.embedding})
+                print("test")
         elif task == "response":
             embeddings = model.encode([instance["output"][1]["content"] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
-                instance.update({"response_embedding": embedding.tolist()})
+                instance.update({"response_embedding": embedding.outputs.embedding})
         elif task == "prompt":
             embeddings = model.encode([instance["prompt"][0] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
-                instance.update({"prompt_embedding": embedding.tolist()})
+                instance.update({"prompt_embedding": embedding.outputs.embedding})
 
 if __name__ == "__main__":
     if len(argv) == 1:
