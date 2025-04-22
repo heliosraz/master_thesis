@@ -77,8 +77,8 @@ if __name__ == "__main__":
         arches = [0, 1, 2, 3]
     else:
         arches = [int(argv[1])]
+    token_embeddings = {arch: {} for arch in arches}
     for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "embed")):
-        data = []
         for arch in arches:
             tok_model = AutoModel.from_pretrained(model_ids[arch])
             tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
@@ -89,7 +89,9 @@ if __name__ == "__main__":
                 batch_size = 32
                 print("Starting embedding...")
                 run(tok_model, tokenizer, data, batch_size=batch_size)
+                token_embeddings[arch] = {instance["prompt"][0]: instance["token_embedding"] for instance in data}
                 checkpoint(model_ids[arch], data)
+    
     for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results", "task")):
         data = []
         for arch in arches:
@@ -106,7 +108,8 @@ if __name__ == "__main__":
                 run(embed_model.llm, tokenizer, data, batch_size=batch_size, task = "definition")
                 run(embed_model.llm, tokenizer, data, batch_size=batch_size, task = "prompt")
                 run(embed_model.llm, tokenizer, data, batch_size=batch_size, task = "response")
-                
+                for instance in data:
+                    instance["token_embedding"] = token_embeddings[arch][instance["sentence"]]
                 checkpoint(embed_model, data)
         
 
