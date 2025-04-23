@@ -25,8 +25,8 @@ def load_data(root, filename: str):
         data = json.load(fp)
     return data
 
-def checkpoint(model:nn.Module, data: List[dict], task: str):
-    data_path = os.path.join(script_dir, "..", "results", "embed", f"{str(model)}-{task}-embeds.json")
+def checkpoint(model:str, data: List[dict], task: str):
+    data_path = os.path.join(script_dir, "..", "results", "embed", f"{model}-{task}-embeds.json")
     with open(data_path, "w") as fp:
         json.dump(data, fp, indent=4)
 
@@ -121,6 +121,6 @@ if __name__ == "__main__":
                         data = load_data(root, fn)
                         batch_size = 16
                         run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
-                        checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[1])
+                        checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[0])
         
 
