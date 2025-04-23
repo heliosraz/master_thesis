@@ -105,7 +105,7 @@ if __name__ == "__main__":
                 for fn in tqdm(files):
                     print(f"Running architecture {arch} on {fn}...")
                     data = load_data(root, fn)
-                    batch_size = 32
+                    batch_size = 16
                     run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["token", "definition", "prompt"])
                     checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[1])
     elif mode == "results":
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                     if "-".join(fn.split("-")[:-1])==model_ids[arch].split("/")[-1]:
                         print(f"Embedding results from {fn} with architecture {arch} ...")
                         data = load_data(root, fn)
-                        batch_size = 8
+                        batch_size = 16
                         run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
                         checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[0])
         
