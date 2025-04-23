@@ -29,41 +29,41 @@ def checkpoint(model:nn.Module, data: List[dict]):
     with open(data_path, "w") as fp:
         json.dump(data, fp, indent=4)
 
-def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task = "token"):
+def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task = "token", device = "auto"):
     for start in tqdm(range(0, len(data), batch_size), desc="Processing batches"):
         end = start + batch_size
         instances = data[start:end]
         if task == "token":
-            inputs = tokenizer([instance["prompt"][0] for instance in instances], return_tensors="pt", padding=True, truncation=True)
-            batch_tokens = []
-            for input_ids in inputs["input_ids"]:
-                batch_tokens += [tokenizer.convert_ids_to_tokens(input_ids)]
+            encodings = tokenizer([instance["prompt"][0] for instance in instances], return_tensors="pt", padding=True, return_offsets_mapping=True)
+            
+            inputs = {k: v.to(device) for k, v in encodings.items() if k != "offset_mapping"}
+            
+            offsets = []
+            for encoding in encodings["offset_mapping"]:
+                offsets.append(encoding)
 
             with torch.no_grad():
-                outputs = model(**inputs)
-
-            batch_contextual_embed = outputs.last_hidden_state
+                outputs = model(**inputs, output_hidden_states=True)
             
-            for instance, embeddings, tokens in zip(instances, batch_contextual_embed, batch_tokens):
+            
+            batch_contextual_embed = outputs.hidden_states[-1]
+            
+            for instance, embeddings, offset in zip(instances, batch_contextual_embed, offsets):
                 added = False
-                for embedding, token in zip(embeddings, tokens):
-                    token = token.replace(u"\u0120", "").replace(u"\u0121", "")
-                    try:
-                        if re.compile(token).match(instance["word"]) or instance["word"] in token:
+                for embedding, (start, end) in zip(embeddings, offset):
+                        token = instance["prompt"][0][start:end]
+                        if token in instance["word"] or instance["word"] in token:
                             instance.update({"token_embedding": embedding.tolist()})
                             added = True
                             break
-                    except re.error:
-                        continue
                 if not added:
-                    print([token.replace(u"\u0120", "").replace(u"\u0121", "") for token in tokens], instance["word"])
+                    print([instance["prompt"][0][start:end] for start, end in offset])
                     raise Exception("Didn't get embedding")
             
         elif task == "definition":
             embeddings = model.encode([instance[task] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
                 instance.update({"definition_embedding": embedding.outputs.embedding})
-                print("test")
         elif task == "response":
             embeddings = model.encode([instance["output"][1]["content"] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
@@ -74,6 +74,7 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
                 instance.update({"prompt_embedding": embedding.outputs.embedding})
 
 if __name__ == "__main__":
+    device = "cpu"
     if len(argv) == 1:
         arches = [0, 1, 2, 3]
     else:
@@ -89,7 +90,7 @@ if __name__ == "__main__":
                     data = json.load(fp)
                     token_embeddings[arch] = {instance["prompt"][0]: instance["token_embedding"] for instance in data}
             else:
-                tok_model = AutoModelForCausalLM.from_pretrained(model_ids[arch])
+                tok_model = AutoModelForCausalLM.from_pretrained(model_ids[arch]).to(device)
                 tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
                 tokenizer.pad_token = tokenizer.eos_token
                 for fn in files:
@@ -97,7 +98,7 @@ if __name__ == "__main__":
                     data = load_data(root, fn)
                     batch_size = 32
                     print("Starting embedding...")
-                    run(tok_model, tokenizer, data, batch_size=batch_size)
+                    run(tok_model, tokenizer, data, batch_size=batch_size, device = device)
                     token_embeddings[arch] = {instance["prompt"][0]: instance["token_embedding"] for instance in data}
                     checkpoint(model_ids[arch].split("/")[-1], data)
     
