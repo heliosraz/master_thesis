@@ -61,15 +61,15 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
                     raise Exception("Didn't get embedding")
             
         elif task == "definition":
-            embeddings = model.encode([instance[task] for instance in instances], use_tqdm = False)
+            embeddings = model.embed([instance[task] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
                 instance.update({"definition_embedding": embedding.outputs.embedding})
         elif task == "response":
-            embeddings = model.encode([instance["output"][1]["content"] for instance in instances], use_tqdm = False)
+            embeddings = model.embed([instance["output"][1]["content"] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
                 instance.update({"response_embedding": embedding.outputs.embedding})
         elif task == "prompt":
-            embeddings = model.encode([instance["prompt"][0] for instance in instances], use_tqdm = False)
+            embeddings = model.embed([instance["prompt"][0] for instance in instances], use_tqdm = False)
             for instance, embedding in zip(instances, embeddings):
                 instance.update({"prompt_embedding": embedding.outputs.embedding})
 
