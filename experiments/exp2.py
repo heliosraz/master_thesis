@@ -84,6 +84,7 @@ if __name__ == "__main__":
         for arch in arches:
             model = AutoModelForCausalLM.from_pretrained(model_ids[arch]).to(device)
             tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
+            tokenizer.pad_token = tokenizer.eos_token
             for fn in files:
                 print(f"Running architecture {arch}...")
                 data = load_data(root, fn)
