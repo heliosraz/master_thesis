@@ -91,6 +91,7 @@ if __name__ == "__main__":
         arches = [0, 1, 2, 3]
         mode = "general"
     else:
+        print(argv)
         arches = [int(argv[1])]
         mode = argv[2]
     if mode == "general":
