@@ -74,7 +74,7 @@ def run(model:nn.Module, tokenizer, data: List[dict], batch_size: int = 32, task
                 instance.update({"prompt_embedding": embedding.outputs.embedding})
 
 if __name__ == "__main__":
-    device = "cpu"
+    device = "cuda"
     if len(argv) == 1:
         arches = [0, 1, 2, 3]
     else:
