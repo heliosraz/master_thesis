@@ -7,7 +7,7 @@ path.append(os.path.join(script_dir, ".."))
 from tqdm import tqdm
 from models import Llama, Mistral, Gemma, DeepSeek
 from torch import nn
-from transformers import AutoTokenizer, AutoModel, Gemma3ForConditionalGeneration, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import re
 

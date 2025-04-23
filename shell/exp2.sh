@@ -8,4 +8,8 @@
 #SBATCH --output=./shell/output/exp_2_output.txt
 
 source ~/miniconda3/bin/activate thesis
-python ~/master_thesis/experiments/exp2.py
+if [ -n "$1" ]; then
+    python ~/master_thesis/experiments/exp2.py $1
+else
+    python ~/master_thesis/experiments/exp2.py
+fi
