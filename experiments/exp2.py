@@ -37,22 +37,22 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
         for task in tasks:
             for i, via in enumerate(vias):
                 if task == "token":
-                    print(f"Starting {via} token embedding...")
+                    # print(f"Starting {via} token embedding...")
                     batch = [instance[via] for instance in instances]
                 elif task == "definition":
                     if i == 1:
                         continue
-                    print("Starting definition embedding...")
+                    # print("Starting definition embedding...")
                     batch = [instance["definition"] for instance in instances]
                 elif task == "response":
                     if i == 1:
                         continue
-                    print("Starting response embedding...")
+                    # print("Starting response embedding...")
                     batch = [instance["output"][1]["content"] for instance in instances]
                 elif task == "prompt":
                     if i == 1:
                         continue
-                    print("Starting prompt embedding...")
+                    # print("Starting prompt embedding...")
                     batch = [instance["prompt"][0] for instance in instances]
                 
                 encodings = tokenizer(batch, return_tensors="pt", padding=True, return_offsets_mapping=True)
@@ -98,8 +98,8 @@ if __name__ == "__main__":
             model = AutoModelForCausalLM.from_pretrained(model_ids[arch]).to(device)
             tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
             tokenizer.pad_token = tokenizer.eos_token
-            for fn in files:
-                print(f"Running architecture {arch}...")
+            for fn in tqdm(files):
+                print(f"Running architecture {arch} on {fn}...")
                 data = load_data(root, fn)
                 batch_size = 32
                 run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device)
