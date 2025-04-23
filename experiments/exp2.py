@@ -116,10 +116,11 @@ if __name__ == "__main__":
                 tokenizer = AutoTokenizer.from_pretrained(model_ids[arch], model_max_length = 300)
                 tokenizer.pad_token = tokenizer.eos_token
                 for fn in tqdm(files):
-                    print(f"Running architecture {arch} on {fn}...")
-                    data = load_data(root, fn)
-                    batch_size = 16
-                    run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
-                    checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[1])
+                    if "-".join(fn.split("-")[:-1])==model_ids[arch].split("/")[-1]:
+                        print(f"Embedding results from {fn} with architecture {arch} ...")
+                        data = load_data(root, fn)
+                        batch_size = 16
+                        run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
+                        checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[1])
         
 
