@@ -119,7 +119,7 @@ if __name__ == "__main__":
                     if "-".join(fn.split("-")[:-1])==model_ids[arch].split("/")[-1]:
                         print(f"Embedding results from {fn} with architecture {arch} ...")
                         data = load_data(root, fn)
-                        batch_size = 16
+                        batch_size = 8
                         run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
                         checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[0])
         
