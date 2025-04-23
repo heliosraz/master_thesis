@@ -106,7 +106,6 @@ if __name__ == "__main__":
         data = []
         for arch in arches:
             embed_model = architectures[arch](device = "auto", task = "embed")
-            tokenizer.pad_token = tokenizer.eos_token
             for fn in files:
                 print(f"Running architecture {arch}...")
                 data = load_data(root, fn)
