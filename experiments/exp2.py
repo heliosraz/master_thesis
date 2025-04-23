@@ -89,20 +89,35 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
 if __name__ == "__main__":
     if len(argv) == 1:
         arches = [0, 1, 2, 3]
+        mode = "general"
     else:
         arches = [int(argv[1])]
-    print(arches)
-    for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results", "task")):
-        data = []
-        for arch in arches:
-            model = AutoModelForCausalLM.from_pretrained(model_ids[arch]).to(device)
-            tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
-            tokenizer.pad_token = tokenizer.eos_token
-            for fn in tqdm(files):
-                print(f"Running architecture {arch} on {fn}...")
-                data = load_data(root, fn)
-                batch_size = 32
-                run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device)
-                checkpoint(model, data, task = fn.split(".")[1])
+        mode = argv[2]
+    if mode == "general":
+        for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "tasks")):
+            data = []
+            for arch in arches:
+                model = AutoModelForCausalLM.from_pretrained(model_ids[arch]).to(device)
+                tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
+                tokenizer.pad_token = tokenizer.eos_token
+                for fn in tqdm(files):
+                    print(f"Running architecture {arch} on {fn}...")
+                    data = load_data(root, fn)
+                    batch_size = 32
+                    run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["token", "definition", "prompt"])
+                    checkpoint(model, data, task = fn.split(".")[1])
+    elif mode == "results":
+        for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results", "task")):
+            data = []
+            for arch in arches:
+                model = AutoModelForCausalLM.from_pretrained(model_ids[arch]).to(device)
+                tokenizer = AutoTokenizer.from_pretrained(model_ids[arch])
+                tokenizer.pad_token = tokenizer.eos_token
+                for fn in tqdm(files):
+                    print(f"Running architecture {arch} on {fn}...")
+                    data = load_data(root, fn)
+                    batch_size = 32
+                    run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
+                    checkpoint(model, data, task = fn.split(".")[1])
         
 
