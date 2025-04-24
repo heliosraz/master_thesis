@@ -107,7 +107,7 @@ if __name__ == "__main__":
                     data = load_data(root, fn)
                     batch_size = 16
                     run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["token", "definition", "prompt"])
-                    checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[1])
+                    checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[0])
     elif mode == "results":
         for root, dirs, files in os.walk(os.path.join(script_dir, "..", "results", "task")):
             data = []
@@ -121,6 +121,6 @@ if __name__ == "__main__":
                         data = load_data(root, fn)
                         batch_size = 16
                         run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
-                        checkpoint(model_ids[arch].split("/")[-1], data, task = fn.split(".")[0])
+                        checkpoint(model_ids[arch].split("/")[-1], data, task = "response")
         
 
