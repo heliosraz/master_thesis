@@ -34,7 +34,6 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
     for start in tqdm(range(0, len(data), batch_size), desc="Processing batches"):
         end = start + batch_size
         instances = data[start:end]
-        torch.cuda.empty_cache()
         for task in tasks:
             for i, via in enumerate(vias):
                 if task == "token":
@@ -88,6 +87,7 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
 
 
 if __name__ == "__main__":
+    torch.cuda.empty_cache()
     if len(argv) == 1:
         arches = [0, 1, 2, 3]
         mode = "general"
@@ -121,6 +121,6 @@ if __name__ == "__main__":
                         data = load_data(root, fn)
                         batch_size = 16
                         run(model, tokenizer=tokenizer, data=data, batch_size=batch_size, device = device, tasks=["response"], vias = ["none"])
-                        checkpoint(model_ids[arch].split("/")[-1], data, task = "response")
+                        checkpoint(model_ids[arch].split("/")[-1], data, task = f"response_{fn.split('-')[-1].split('.')[0]}")
         
 
