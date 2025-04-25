@@ -16,7 +16,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 architectures = [Llama, Gemma, Mistral, DeepSeek]
 model_ids = {0: "meta-llama/Llama-3.2-3B-Instruct", 1: "google/gemma-3-4b-it", 2: "mistralai/Mistral-7B-Instruct-v0.3", 3: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"}
 os.makedirs(os.path.join(script_dir, "..", "results", "embed"), exist_ok=True)
-device = "cpu"
+device = "cuda"
 
 def load_data(root, filename: str):
     file_path = os.path.join(root, filename)
