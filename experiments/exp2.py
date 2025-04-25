@@ -16,7 +16,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 architectures = [Llama, Gemma, Mistral, DeepSeek]
 model_ids = {0: "meta-llama/Llama-3.2-3B-Instruct", 1: "google/gemma-3-4b-it", 2: "mistralai/Mistral-7B-Instruct-v0.3", 3: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"}
 os.makedirs(os.path.join(script_dir, "..", "results", "embed"), exist_ok=True)
-device = "cuda"
+device = "cpu"
 
 def load_data(root, filename: str):
     file_path = os.path.join(root, filename)
@@ -30,7 +30,7 @@ def checkpoint(model:str, data: List[dict], task: str):
     with open(data_path, "w") as fp:
         json.dump(data, fp, indent=4)
 
-def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32, tasks:List[str] = ["token", "definition", "response", "prompt"], vias: List[str] = ["definition", "sentence"], device = "auto"):
+def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32, tasks:List[str] = ["token", "definition", "response", "prompt"], vias: List[str] = ["prompt", "sentence"], device = "auto"):
     for start in tqdm(range(0, len(data), batch_size), desc="Processing batches"):
         end = start + batch_size
         instances = data[start:end]
@@ -38,7 +38,10 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
             for i, via in enumerate(vias):
                 if task == "token":
                     # print(f"Starting {via} token embedding...")
-                    batch = [instance[via] for instance in instances]
+                    if via == "prompt":
+                        batch = [instance[via][0] for instance in instances]
+                    else:
+                        batch = [instance[via] for instance in instances]
                 elif task == "definition":
                     if i == 1:
                         continue
@@ -68,18 +71,18 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
                 
                 batch_contextual_embed = outputs.hidden_states[-1]
                 
-                for instance, embeddings, offset in zip(instances, batch_contextual_embed, offsets):
-                    
+                for instance, context, embeddings, offset in zip(instances, batch, batch_contextual_embed, offsets):
+                    target = instance["word"]
                     if task == "token":
                         added = False
                         for embedding, (start, end) in zip(embeddings, offset):
-                                token = instance["prompt"][0][start:end]
-                                if token in instance["word"] or instance["word"] in token:
+                                token = context[start:end]
+                                if token in target or target in token:
                                     instance.update({f"{task}_{via}_embedding": embedding.tolist()})
                                     added = True
                                     break
                         if not added:
-                            print([instance["prompt"][0][start:end] for start, end in offset])
+                            print([context[start:end] for start, end in offset])
                             raise Exception("Didn't get embedding")
                     else:
                         instance.update({f"{task}_embedding": embeddings.mean(dim=1).tolist()})
@@ -87,7 +90,7 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
 
 
 if __name__ == "__main__":
-    torch.cuda.empty_cache()
+    # torch.cuda.empty_cache()
     if len(argv) == 1:
         arches = [0, 1, 2, 3]
         mode = "general"
