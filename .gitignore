@@ -180,3 +180,4 @@ output.txt
 /results
 /shell/output/
 .vscode
+*.tar.gz
