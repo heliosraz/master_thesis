@@ -111,7 +111,7 @@ if __name__ == "__main__":
                 ax = fig.add_subplot(projection='3d')
                 ax.scatter(tsne_X[:, 0], tsne_X[:, 1], tsne_X[:,2])
                 fig.title(f'Clusters for {embedding_types[i]} - {model_X}')
-                plt.show()
+                plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{embedding_types[i]}_{model_X}_clustering.png"))
     with open(os.path.join(script_dir, "..", "results", "cluster", "clusters.json"), "w") as fp:
         json.dump(Xs, fp, indent=4)
     with open(os.path.join(script_dir, "..", "results", "cluster", "labels.json"), "w") as fp:
