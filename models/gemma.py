@@ -60,6 +60,8 @@ class Gemma(nn.Module):
         )
         self.model_id = model_id
         llm_params = {k: val for k, val in kwargs.items()}
+        print(llm_params)
+        print(str(**llm_params))
         self.llm = LLM(model=model_id, device=device, max_model_len=model_len, **llm_params)
         self.model_id = model_id
 

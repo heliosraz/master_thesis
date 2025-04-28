@@ -49,7 +49,7 @@ def run(model:nn.Module, data: List[dict], task: int, batch_size: int = 128):
 
 if __name__ == "__main__":
     if len(argv) == 1:
-        arches = [0, 1, 2]
+        arches = [0, 1, 2, 3]
     else:
         arches = [int(argv[1])]
     if len(argv)>2:

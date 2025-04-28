@@ -31,6 +31,11 @@ sbatch --job-name=judge_1_gemma_12 --output=./shell/output/judge_1_gemma_gemma12
 sbatch --job-name=judge_1_mistral_12 --output=./shell/output/judge_1_mistral_gemma12_output.txt shell/judge.sh 2 gemma-3-12b-it-task1.json
 sbatch --job-name=judge_1_dpseek_12 --output=./shell/output/judge_1_dpseek_gemma12_output.txt shell/judge.sh 3 gemma-3-12b-it-task1.json
 
+sbatch --job-name=judge_1_llama_4 --output=./shell/output/judge_1_llama_gemma4_output.txt shell/judge.sh 0 gemma-3-4b-it-task1.json
+sbatch --job-name=judge_1_gemma_4 --output=./shell/output/judge_1_gemma_gemma4_output.txt shell/judge.sh 1 gemma-3-4b-it-task1.json
+sbatch --job-name=judge_1_mistral_4 --output=./shell/output/judge_1_mistral_gemma4_output.txt shell/judge.sh 2 gemma-3-4b-it-task1.json
+sbatch --job-name=judge_1_dpseek_4 --output=./shell/output/judge_1_dpseek_gemma4_output.txt shell/judge.sh 3 gemma-3-4b-it-task1.json
+
 sbatch --job-name=judge_1_llama_llama --output=./shell/output/judge_1_llama_llama_output.txt shell/judge.sh 0 Llama-3.2-3B-Instruct-task1.json
 sbatch --job-name=judge_1_gemma_llama --output=./shell/output/judge_1_gemma_llama_output.txt shell/judge.sh 1 Llama-3.2-3B-Instruct-task1.json
 sbatch --job-name=judge_1_mistral_llama --output=./shell/output/judge_1_mistral_llama_output.txt shell/judge.sh 2 Llama-3.2-3B-Instruct-task1.json
