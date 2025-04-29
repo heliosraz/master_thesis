@@ -16,7 +16,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 architectures = [Llama, Gemma, Mistral, DeepSeek]
 model_ids = {0: "meta-llama/Llama-3.2-3B-Instruct", 1: "google/gemma-3-4b-it", 2: "mistralai/Mistral-7B-Instruct-v0.3", 3: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"}
 os.makedirs(os.path.join(script_dir, "..", "results", "embed"), exist_ok=True)
-device = "cuda"
+device = "cpu"
 
 def load_data(root, filename: str):
     file_path = os.path.join(root, filename)
@@ -86,6 +86,7 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
                             raise Exception("Didn't get embedding")
                     else:
                         instance.update({f"{task}_embedding": embeddings.mean(dim=0).tolist()})
+                    print(len(instance[f"{task}_embedding"]))
                 
 
 
@@ -118,6 +119,7 @@ if __name__ == "__main__":
                 model = AutoModelForCausalLM.from_pretrained(model_ids[arch]).to(device)
                 tokenizer = AutoTokenizer.from_pretrained(model_ids[arch], model_max_length = 300)
                 tokenizer.pad_token = tokenizer.eos_token
+                
                 for fn in tqdm(files):
                     if "-".join(fn.split("-")[:-1])==model_ids[arch].split("/")[-1]:
                         print(f"Embedding results from {fn} with architecture {arch} ...")
