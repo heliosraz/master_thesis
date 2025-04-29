@@ -16,7 +16,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "true"
 architectures = [Llama, Gemma, Mistral, DeepSeek]
 model_ids = {0: "meta-llama/Llama-3.2-3B-Instruct", 1: "google/gemma-3-4b-it", 2: "mistralai/Mistral-7B-Instruct-v0.3", 3: "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"}
 os.makedirs(os.path.join(script_dir, "..", "results", "embed"), exist_ok=True)
-device = "cuda"
+device = "cpu"
 
 def load_data(root, filename: str):
     file_path = os.path.join(root, filename)
@@ -86,19 +86,20 @@ def run(model:nn.Module, data: List[dict], tokenizer=None, batch_size: int = 32,
                             raise Exception("Didn't get embedding")
                     else:
                         instance.update({f"{task}_embedding": embeddings.mean(dim=0).tolist()})
-                    print(len(instance[f"{task}_embedding"]))
                 
 
 
 if __name__ == "__main__":
     # torch.cuda.empty_cache()
-    if len(argv) == 1:
-        arches = [0, 1, 2, 3]
-        mode = "general"
-    else:
-        print(argv)
-        arches = [int(argv[1])]
-        mode = argv[2]
+    arches = [3]
+    mode = "results"
+    # if len(argv) == 1:
+    #     arches = [0, 1, 2, 3]
+    #     mode = "general"
+    # else:
+    #     print(argv)
+    #     arches = [int(argv[1])]
+    #     mode = argv[2]
     if mode == "general":
         for root, dirs, files in os.walk(os.path.join(script_dir, "..", "data", "tasks")):
             data = []
