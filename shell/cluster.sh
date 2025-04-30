@@ -6,5 +6,5 @@
 #SBATCH --mem-per-cpu=16384
 #SBATCH --partition=regular
 
-cd ~/master_thesis
+source ~/miniconda3/bin/activate thesis
 PYTHONPATH=~/master_thesis python3 ~/master_thesis/experiments/cluster.py
