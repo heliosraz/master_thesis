@@ -37,7 +37,7 @@ def get_embeddings(embedding_types = ["token_prompt",
     plt.xticks(xticks)
     for root, dirs, files in os.walk(result_path):
         for fn in tqdm(files):
-            print(fn)
+        # for fn in tqdm(["DeepSeek-R1-Distill-Llama-8B-response_task1-embeds.json"]):
             model = "-".join(fn.split("-")[:4])
             task = fn.split("task")[-1].split("-")[0]
             # os.path.join(script_dir, "..", "results", "embed", f"{model}-{task}-embeds.json")
@@ -59,12 +59,12 @@ def get_embeddings(embedding_types = ["token_prompt",
                     if f"{embedding_type}_embedding" in instance:           
                         k_range, inertias = elbow(embeddings[embedding_type][model][int(task)], labels[embedding_type][model][int(task)])
                         plt.plot(k_range, inertias, '-', linewidth=1)
-                        plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_elbow.png"))
+                        # plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_elbow.png"))
     plt.savefig(os.path.join(script_dir, "..", "results", "cluster", "elbow.png"))
     # plt.show()
     return embeddings, labels
 
-def cluster(X, y, pca, kmeans):
+def cluster(X, pca, kmeans):
     X = pca.fit_transform(X)
     clustering = kmeans.fit(X)
     return clustering.labels_
@@ -74,7 +74,7 @@ def elbow(X, y):
     inertias = []
     pca = PCA(n_components=2)
     X = pca.fit_transform(torch.Tensor(X))
-    k_range = range(1, 20)
+    k_range = range(1, 13)
     for k in k_range:
         model = KMeans(n_clusters=k, random_state=0)
         model.fit(X)
@@ -104,14 +104,14 @@ if __name__ == "__main__":
     for i, (model_X, model_y) in enumerate(zip(Xs.values(), ys.values())):
         for task_X, task_y in zip(model_X.values(), model_y.values()):
             for X, y in zip(task_X.values(), task_y.values()):
-                task_X["cluster_labels"] = cluster(X, y, pca, kmeans)
+                task_X["cluster_labels"] = cluster(X, pca, kmeans)
                 tsne_X = tsne.fit_transform(X)
                 # plot clusters
                 fig = plt.figure()
                 ax = fig.add_subplot(projection='3d')
                 ax.scatter(tsne_X[:, 0], tsne_X[:, 1], tsne_X[:,2])
                 fig.title(f'Clusters for {embedding_types[i]} - {model_X}')
-                plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{embedding_types[i]}_{model_X}_clustering.png"))
+                plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model_X}_{embedding_types[i]}_clustering.png"))
     with open(os.path.join(script_dir, "..", "results", "cluster", "clusters.json"), "w") as fp:
         json.dump(Xs, fp, indent=4)
     with open(os.path.join(script_dir, "..", "results", "cluster", "labels.json"), "w") as fp:
