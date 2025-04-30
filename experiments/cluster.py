@@ -30,11 +30,11 @@ def get_embeddings(embedding_types = ["token_prompt",
     result_path = os.path.join(script_dir, "..", "results", "embed")
     embeddings = {et: {} for et in embedding_types}
     labels = {et: {} for et in embedding_types}
-    plt.xlabel('k')
-    plt.ylabel('Inertia')
-    plt.title('Elbow Method For Optimal k')
-    xticks = np.arange(1, 21, 1)
-    plt.xticks(xticks)
+    # plt.xlabel('k')
+    # plt.ylabel('Inertia')
+    # plt.title('Elbow Method For Optimal k')
+    # xticks = np.arange(1, 21, 1)
+    # plt.xticks(xticks)
     for root, dirs, files in os.walk(result_path):
         for fn in tqdm(files):
         # for fn in tqdm(["DeepSeek-R1-Distill-Llama-8B-response_task1-embeds.json"]):
@@ -56,11 +56,11 @@ def get_embeddings(embedding_types = ["token_prompt",
                             else:
                                 labels[embedding_type][model][int(task)].append(instance[embedding_type.split("_")[-1]])
                     # TESTING how many cluster to use:
-                    if f"{embedding_type}_embedding" in instance:           
-                        k_range, inertias = elbow(embeddings[embedding_type][model][int(task)], labels[embedding_type][model][int(task)])
-                        plt.plot(k_range, inertias, '-', linewidth=1)
-                        # plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_elbow.png"))
-    plt.savefig(os.path.join(script_dir, "..", "results", "cluster", "elbow.png"))
+                    # if f"{embedding_type}_embedding" in instance:           
+                    #     k_range, inertias = elbow(embeddings[embedding_type][model][int(task)])
+                    #     plt.plot(k_range, inertias, '-', linewidth=1)
+                    #     # plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_elbow.png"))
+    # plt.savefig(os.path.join(script_dir, "..", "results", "cluster", "elbow.png"))
     # plt.show()
     return embeddings, labels
 
@@ -70,10 +70,10 @@ def cluster(X, pca, kmeans):
     return clustering.labels_
             
         
-def elbow(X, y):
+def elbow(X):
     inertias = []
     pca = PCA(n_components=2)
-    X = pca.fit_transform(torch.Tensor(X))
+    X = pca.fit_transform(X)
     k_range = range(1, 13)
     for k in k_range:
         model = KMeans(n_clusters=k, random_state=0)
@@ -88,15 +88,6 @@ if __name__ == "__main__":
     embedding_types = ["token_prompt", "token_sentence", "definition", "prompt", "response"]
     cluster_labels = {et: {} for et in embedding_types}
     Xs, ys = get_embeddings()
-    # with open(os.path.join(script_dir, "..", "results", "cluster", "clusters.json"), "w") as fp:
-    #     json.dump(Xs, fp, indent=4)
-    # with open(os.path.join(script_dir, "..", "results", "cluster", "labels.json"), "w") as fp:
-    #     json.dump(ys, fp, indent=4)
-    # with open(os.path.join(script_dir, "..", "results", "cluster", "clusters.json"), "r") as fp:
-    #     Xs = json.load(fp)
-    
-    # with open(os.path.join(script_dir, "..", "results", "cluster", "labels.json"), "r") as fp:
-    #     ys = json.load(fp)
     kmeans = KMeans(n_clusters=5, random_state=0)
     tsne = TSNE(n_components=3, learning_rate='auto',
                 init='random', perplexity=3)
@@ -104,6 +95,7 @@ if __name__ == "__main__":
     for i, (model_X, model_y) in enumerate(zip(Xs.values(), ys.values())):
         for task_X, task_y in zip(model_X.values(), model_y.values()):
             for X, y in zip(task_X.values(), task_y.values()):
+                X = torch.Tensor(X)
                 task_X["cluster_labels"] = cluster(X, pca, kmeans)
                 tsne_X = tsne.fit_transform(X)
                 # plot clusters
