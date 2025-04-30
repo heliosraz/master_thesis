@@ -94,7 +94,7 @@ if __name__ == "__main__":
     pca = PCA(n_components=2)
     for i, (model_X, model_y) in enumerate(zip(Xs.values(), ys.values())):
         for task_X, task_y in zip(model_X.values(), model_y.values()):
-            for X, y in zip(task_X.values(), task_y.values()):
+            for X, y in tqdm(zip(task_X.values(), task_y.values()),total = len(task_X), desc="Clustering:"):
                 X = torch.Tensor(X)
                 task_X["cluster_labels"] = cluster(X, pca, kmeans)
                 tsne_X = tsne.fit_transform(X)
