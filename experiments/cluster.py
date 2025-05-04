@@ -25,6 +25,7 @@ def get_parquet(model: str, embedding_types = ["token_prompt",
         for fn in tqdm(files):
             label_types = set()
             if fn.split("-")[0]==model:
+                print(fn)
                 task = fn.split("task")[-1].split("-")[0]
                 with open(os.path.join(result_path, fn), "r") as f:
                     data = json.load(f)
