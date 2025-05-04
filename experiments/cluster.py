@@ -37,7 +37,9 @@ def get_parquet(model: str, embedding_types = ["token_prompt",
                                 if embedding_type=="response":
                                     label = instance["output"][1]["content"]
                                 else:
-                                    label = instance[embedding_type.split("_")[-1]]
+                                    label = instance[embedding_type.split("_")[-1]][0]
+                                if type(label) == list:
+                                    label = label[0]
                                 label_types.add(type(label))
                                 df.loc[-1] = [model, embedding_type, task, label, embedding, -1, -1]  # adding a row
                                 df.index = df.index + 1  # shifting index
