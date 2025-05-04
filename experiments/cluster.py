@@ -21,7 +21,8 @@ def get_parquet(model: str, embedding_types = ["token_prompt",
     result_path = os.path.join(script_dir, "..", "results", "embed")
     df = pd.DataFrame(columns = ["model", "embedding_type", "task", "label","embedding", "cluster", "center"])
     for root, dirs, files in os.walk(result_path):
-        for fn in tqdm(files):   
+        for fn in tqdm(files):
+            label_types = {}
             if fn.split("-")[0]==model:
                 task = fn.split("task")[-1].split("-")[0]
                 with open(os.path.join(result_path, fn), "r") as f:
@@ -35,9 +36,11 @@ def get_parquet(model: str, embedding_types = ["token_prompt",
                                     label = instance["output"][1]["content"]
                                 else:
                                     label = instance[embedding_type.split("_")[-1]]
+                                label_types.add(type(label))
                                 df.loc[-1] = [model, embedding_type, task, label, embedding, -1, -1]  # adding a row
                                 df.index = df.index + 1  # shifting index
                                 df = df.sort_index()  # sorting by index
+                print(label_types)
     df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", f"{model}.parquet"))
     return df
 
