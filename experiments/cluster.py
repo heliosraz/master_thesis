@@ -68,31 +68,31 @@ if __name__ == "__main__":
     for model in ["DeepSeek", "gemma", "Llama", "Mistral"]:
         cluster_labels = {et: {} for et in embedding_types}
         get_parquet(model)
-    kmeans = KMeans(n_clusters=5, random_state=0)
-    tsne = TSNE(n_components=2, learning_rate='auto',
-                init='random', perplexity=3)
-    pca = PCA(n_components=2)
-    for model in ["DeepSeek", "gemma", "Llama", "Mistral"]:
-        df = get_data(model+".parquet")
-        for embedding_type in embedding_types:
-            for task in ["1","2","3","4"]:
-                X = df.loc[(df["embedding_type"]==embedding_type)&(df["task"]==task)]["embedding"].values
-                X = torch.tensor(np.vstack(X), dtype=torch.float32)
-                clustering = cluster(X, pca, kmeans)
-                df.loc((df["embedding_type"]==embedding_type)&(df["task"]==task))["cluster"] = pd.Series(clustering.labels_)
+    # kmeans = KMeans(n_clusters=5, random_state=0)
+    # tsne = TSNE(n_components=2, learning_rate='auto',
+    #             init='random', perplexity=3)
+    # pca = PCA(n_components=2)
+    # for model in ["DeepSeek", "gemma", "Llama", "Mistral"]:
+    #     df = get_data(model+".parquet")
+    #     for embedding_type in embedding_types:
+    #         for task in ["1","2","3","4"]:
+    #             X = df.loc[(df["embedding_type"]==embedding_type)&(df["task"]==task)]["embedding"].values
+    #             X = torch.tensor(np.vstack(X), dtype=torch.float32)
+    #             clustering = cluster(X, pca, kmeans)
+    #             df.loc((df["embedding_type"]==embedding_type)&(df["task"]==task))["cluster"] = pd.Series(clustering.labels_)
                 
-                tsne_X = tsne.fit_transform(X)
-                # plot clusters
-                print("Plotting...")
-                fig = plt.figure()
-                ax = fig.add_subplot()
-                ax.scatter(tsne_X[:, 0], tsne_X[:, 1], c = clustering.labels_)
-                ax.set_title(f'Clusters for {embedding_type} - {model} - Task {task}')
-                # fig.show()
+    #             tsne_X = tsne.fit_transform(X)
+    #             # plot clusters
+    #             print("Plotting...")
+    #             fig = plt.figure()
+    #             ax = fig.add_subplot()
+    #             ax.scatter(tsne_X[:, 0], tsne_X[:, 1], c = clustering.labels_)
+    #             ax.set_title(f'Clusters for {embedding_type} - {model} - Task {task}')
+    #             # fig.show()
                 
-                # print("Saving plot...")
-                plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_clustering.png"))
-        df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", model+".parquet"))
+    #             # print("Saving plot...")
+    #             plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_clustering.png"))
+    #     df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", model+".parquet"))
     # with open(os.path.join(script_dir, "..", "results", "cluster", "clusters.json"), "w") as fp:
     #     json.dump(Xs, fp, indent=4)
     # with open(os.path.join(script_dir, "..", "results", "cluster", "labels.json"), "w") as fp:
