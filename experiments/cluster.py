@@ -11,62 +11,40 @@ os.makedirs(os.path.join(script_dir, "..", "results", "cluster"), exist_ok=True)
 import json
 from tqdm import tqdm
 import torch
-
-def collect_embeddings(data_path, type, model = "all"):
-    embeddings = {}
-    with open(data_path, "w") as f:
-        data = json.load(f)
-    model_id = "-".join(data_path.split("/").split("-")[:-1])
-    if model_id not in embeddings:
-        embeddings[model_id] = []
-    for instance in data:
-        embeddings[model_id] = instance[f"{type}_embedding"]
+import pandas as pd
         
-def get_embeddings(embedding_types = ["token_prompt",
+def get_parquet(model: str, embedding_types = ["token_prompt",
                                     "token_sentence",
                                     "definition",
                                     "prompt",
                                     "response"]):
     result_path = os.path.join(script_dir, "..", "results", "embed")
-    embeddings = {et: {} for et in embedding_types}
-    labels = {et: {} for et in embedding_types}
-    # plt.xlabel('k')
-    # plt.ylabel('Inertia')
-    # plt.title('Elbow Method For Optimal k')
-    # xticks = np.arange(1, 21, 1)
-    # plt.xticks(xticks)
+    df = pd.DataFrame(columns = ["model", "embedding_type", "task", "label","embedding", "cluster", "center"])
     for root, dirs, files in os.walk(result_path):
-        for fn in tqdm(files):
-        # for fn in tqdm(["DeepSeek-R1-Distill-Llama-8B-response_task1-embeds.json"]):
-            model = "-".join(fn.split("-")[:4])
-            task = fn.split("task")[-1].split("-")[0]
-            with open(os.path.join(root, fn), "r") as f:
-                data = json.load(f)
-                for embedding_type in embedding_types:
-                    for instance in data:
-                        if model not in embeddings[embedding_type]:
-                            embeddings[embedding_type][model]= {i: [] for i in range(1,5)}
-                        if model not in labels[embedding_type]:
-                            labels[embedding_type][model]= {i: [] for i in range(1,5)}
-                        if f"{embedding_type}_embedding" in instance:
-                            embeddings[embedding_type][model][int(task)].append(instance[f"{embedding_type}_embedding"])
-                            if embedding_type=="response":
-                                labels[embedding_type][model][int(task)].append(instance["output"][1]["content"])
-                            else:
-                                labels[embedding_type][model][int(task)].append(instance[embedding_type.split("_")[-1]])
-                    # TESTING how many cluster to use:
-                    # if f"{embedding_type}_embedding" in instance:           
-                    #     k_range, inertias = elbow(embeddings[embedding_type][model][int(task)])
-                    #     plt.plot(k_range, inertias, '-', linewidth=1)
-                    #     # plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_elbow.png"))
-    # plt.savefig(os.path.join(script_dir, "..", "results", "cluster", "elbow.png"))
-    # plt.show()
-    return embeddings, labels
+        for fn in tqdm(files):   
+            if fn.split("-")[0]==model:
+                task = fn.split("task")[-1].split("-")[0]
+                with open(os.path.join(result_path, fn), "r") as f:
+                    data = json.load(f)
+                    for embedding_type in embedding_types:
+                        for instance in data:
+                            if f"{embedding_type}_embedding" in instance:
+                                embedding = instance[f"{embedding_type}_embedding"]
+                                
+                                if embedding_type=="response":
+                                    label = instance["output"][1]["content"]
+                                else:
+                                    label = instance[embedding_type.split("_")[-1]]
+                                df.loc[-1] = [model, embedding_type, task, label, embedding, -1, -1]  # adding a row
+                                df.index = df.index + 1  # shifting index
+                                df = df.sort_index()  # sorting by index
+    df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", f"{model}.parquet"))
+    return df
 
 def cluster(X, pca, kmeans):
     X = pca.fit_transform(X)
     clustering = kmeans.fit(X)
-    return clustering.labels_, clustering.cluster_centers_
+    return clustering
             
         
 def elbow(X):
@@ -81,35 +59,44 @@ def elbow(X):
         
     return k_range, inertias
 
+def get_data(file_name:str):
+    return pd.read_parquet(os.path.join(script_dir, "..", "data", "cluster", file_name))
+    
+
 if __name__ == "__main__":
     embedding_types = ["token_prompt", "token_sentence", "definition", "prompt", "response"]
-    cluster_labels = {et: {} for et in embedding_types}
-    Xs, ys = get_embeddings()
+    for model in ["DeepSeek", "gemma", "Llama", "Mistral"]:
+        cluster_labels = {et: {} for et in embedding_types}
+        get_parquet(model)
     kmeans = KMeans(n_clusters=5, random_state=0)
     tsne = TSNE(n_components=2, learning_rate='auto',
                 init='random', perplexity=3)
     pca = PCA(n_components=2)
-    for i, (model_X, model_y) in enumerate(zip(Xs.values(), ys.values())):
-        if model_X:
-            for task_X, task_y in zip(model_X.values(), model_y.values()):
-                for X, y in tqdm(zip(task_X.values(), task_y.values()),total = len(task_X), desc="Clustering"):
-                    if X:
-                        X = torch.Tensor(X)
-                        task_X["cluster_labels"], task_X["cluster_centers"]= cluster(X, pca, kmeans)
-                        # tsne_X = tsne.fit_transform(X)
-                        # # plot clusters
-                        # print("Plotting...")
-                        # fig = plt.figure()
-                        # ax = fig.add_subplot()
-                        # ax.scatter(tsne_X[:, 0], tsne_X[:, 1], c = task_X["cluster_labels"])
-                        # ax.set_title(f'Clusters for {embedding_types[i]} - {model_X}')
-                        # fig.show()
-                        # print("Saving plot...")
-                        # plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model_X}_{embedding_types[i]}_clustering.png"))
-    with open(os.path.join(script_dir, "..", "results", "cluster", "clusters.json"), "w") as fp:
-        json.dump(Xs, fp, indent=4)
-    with open(os.path.join(script_dir, "..", "results", "cluster", "labels.json"), "w") as fp:
-        json.dump(ys, fp, indent=4)
+    for model in ["DeepSeek", "gemma", "Llama", "Mistral"]:
+        df = get_data(model+".parquet")
+        for embedding_type in embedding_types:
+            for task in ["1","2","3","4"]:
+                X = df.loc[(df["embedding_type"]==embedding_type)&(df["task"]==task)]["embedding"].values
+                X = torch.tensor(np.vstack(X), dtype=torch.float32)
+                clustering = cluster(X, pca, kmeans)
+                df.loc((df["embedding_type"]==embedding_type)&(df["task"]==task))["cluster"] = pd.Series(clustering.labels_)
+                
+                tsne_X = tsne.fit_transform(X)
+                # plot clusters
+                print("Plotting...")
+                fig = plt.figure()
+                ax = fig.add_subplot()
+                ax.scatter(tsne_X[:, 0], tsne_X[:, 1], c = clustering.labels_)
+                ax.set_title(f'Clusters for {embedding_type} - {model} - Task {task}')
+                # fig.show()
+                
+                # print("Saving plot...")
+                plt.savefig(os.path.join(script_dir, "..", "results", "cluster", f"{model}_{embedding_type}_{task}_clustering.png"))
+        df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", model+".parquet"))
+    # with open(os.path.join(script_dir, "..", "results", "cluster", "clusters.json"), "w") as fp:
+    #     json.dump(Xs, fp, indent=4)
+    # with open(os.path.join(script_dir, "..", "results", "cluster", "labels.json"), "w") as fp:
+    #     json.dump(ys, fp, indent=4)
         
         
         # cluster token_definition regardless of task
