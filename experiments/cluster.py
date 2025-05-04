@@ -8,6 +8,7 @@ from sys import path
 script_dir = os.path.dirname(os.path.abspath(__file__))
 path.append(os.path.join(script_dir, ".."))
 os.makedirs(os.path.join(script_dir, "..", "results", "cluster"), exist_ok=True)
+os.makedirs(os.path.join(script_dir, "..", "data", "cluster"), exist_ok=True)
 import json
 from tqdm import tqdm
 import torch
@@ -22,7 +23,7 @@ def get_parquet(model: str, embedding_types = ["token_prompt",
     df = pd.DataFrame(columns = ["model", "embedding_type", "task", "label","embedding", "cluster", "center"])
     for root, dirs, files in os.walk(result_path):
         for fn in tqdm(files):
-            label_types = {}
+            label_types = set()
             if fn.split("-")[0]==model:
                 task = fn.split("task")[-1].split("-")[0]
                 with open(os.path.join(result_path, fn), "r") as f:
