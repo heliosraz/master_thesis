@@ -34,15 +34,14 @@ def get_parquet(model: str, embedding_types = ["token_prompt",
                                     "prompt",
                                     "response"]):
     result_path = os.path.join(script_dir, "..", "results", "embed")
-    df = pd.DataFrame(columns = ["model", "embedding_type", "task", "label","embedding", "cluster", "center"])
     for _, _, files in os.walk(result_path):
+        rows = []
         for fn in tqdm(files):
             label_types = set()
             if fn.split("-")[0]==model:
                 print(fn)
                 task = fn.split("task")[-1].split("-")[0]
-                data = get_data(fn)
-                for instance in tqdm(data):
+                for instance in tqdm(get_data(fn)):
                     for embedding_type in embedding_types:
                         if f"{embedding_type}_embedding" in instance:
                             embedding = instance[f"{embedding_type}_embedding"]
@@ -54,9 +53,8 @@ def get_parquet(model: str, embedding_types = ["token_prompt",
                             if type(label) == list:
                                 label = label[0]
                             label_types.add(type(label))
-                            df.loc[-1] = [model, embedding_type, task, label, embedding, -1, -1]  # adding a row
-                            df.index = df.index + 1  # shifting index
-                            df = df.sort_index()  # sorting by index
+                            rows.append([model, embedding_type, task, label, embedding, -1, -1])  # adding a row
+    df = pd.DataFrame(rows, columns = ["model", "embedding_type", "task", "label","embedding", "cluster", "center"])
     df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", f"{model}.parquet"))
     return df
 
@@ -83,7 +81,6 @@ def get_data(file_name:str):
     with open(os.path.join(result_path, file_name), "r") as f:
         data = decode(f.read(), type=list[dict])
     return data
-
     
 
 if __name__ == "__main__":
