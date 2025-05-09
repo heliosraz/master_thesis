@@ -26,7 +26,7 @@ QA_TEMPLATE = """
 """
 
 
-class DataInstance():
+class DataInstance:
     def __init__(self, word, definition, example):
         self.word = word
         self.definition = definition
@@ -37,7 +37,9 @@ def format_task(messages: List[Dict[str, str]]):
     prompt = SYSTEM_PROMPT
     for question, answer in zip(messages[:-1:2], messages[1::2]):
         prompt += QA_TEMPLATE.format(
-            question=question["content"].replace("Question:", ""), answer=answer["content"].replace("Answer:", ""))
+            question=question["content"].replace("Question:", ""),
+            answer=answer["content"].replace("Answer:", ""),
+        )
     return [prompt]
 
 
@@ -53,9 +55,12 @@ def generate_task(file_path: str):
             results.append(instance)
     return results
 
+
 def save(model_task, prompts):
-    with open(os.path.join(script_dir, "..", "data", "judgement", model_task),"w") as f:
-        json.dump(prompts, fp = f, indent = 4)
+    with open(
+        os.path.join(script_dir, "..", "data", "judgement", model_task), "w"
+    ) as f:
+        json.dump(prompts, fp=f, indent=4)
 
 
 def main(data_file: str = ""):
@@ -67,11 +72,11 @@ def main(data_file: str = ""):
             if f.endswith(".json"):
                 fp = os.path.join(script_dir, "..", "results", f)
                 prompts = generate_task(file_path=fp)
-                save(model_task = f, prompts = prompts)
+                save(model_task=f, prompts=prompts)
 
 
 if __name__ == "__main__":
-    if len(sys.argv)>1:
+    if len(sys.argv) > 1:
         main(sys.argv[1])
     else:
         main()
