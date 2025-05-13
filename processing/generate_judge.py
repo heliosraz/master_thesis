@@ -68,11 +68,10 @@ def main(data_file: str = ""):
         fp = os.path.join(script_dir, "..", "results", data_file)
         generate_task(fp)
     else:
-        for f in tqdm(os.listdir(os.path.join(script_dir, "..", "results"))):
-            if f.endswith(".json"):
-                fp = os.path.join(script_dir, "..", "results", f)
-                prompts = generate_task(file_path=fp)
-                save(model_task=f, prompts=prompts)
+        for f in tqdm(os.listdir(os.path.join(script_dir, "..", "results", "task"))):
+            fp = os.path.join(script_dir, "..", "results", f)
+            prompts = generate_task(file_path=fp)
+            save(model_task=f, prompts=prompts)
 
 
 if __name__ == "__main__":
