@@ -5,6 +5,7 @@ import os
 import itertools
 import pandas as pd
 from sys import argv, path
+from typing import List
 
 print(os.getcwd())
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -60,21 +61,22 @@ def generate_examples(
     word: str,
     pairs: Iterable[Tuple[str, str]],
     task: int,
-    gold: Dict[tuple, str] = None,
+    gold: Dict[str, List[str]] = None,
 ):
+    if gold:
+        gold = {v[0]: k for k, v in gold.items() if v}
     examples = []
-    for defn, sentence in pairs:
-        filter_sentence = [s for s in sentence if word in s]
-        if defn and filter_sentence:
-            example = DataInstance(word, defn, filter_sentence[0])
+    for defn, sentences in pairs:
+        if defn and sentences:
+            example = DataInstance(word, defn, sentences[0])
             prompt = format_task(example, task)
             if gold:
                 examples.append(
                     {
                         "word": word,
-                        "definition": defn,
-                        "gold": gold[sentence],
-                        "sentence": sentence[0],
+                        "definition": example.definition,
+                        "gold": gold[sentences[0]],
+                        "sentence": example.example,
                         "prompt": prompt,
                     }
                 )
@@ -82,8 +84,8 @@ def generate_examples(
                 examples.append(
                     {
                         "word": word,
-                        "definition": defn,
-                        "sentence": sentence[0],
+                        "definition": example.definition,
+                        "sentence": example.example,
                         "prompt": prompt,
                     }
                 )
@@ -92,33 +94,58 @@ def generate_examples(
 
 def task_helper(word: str, task: int):
     instances = []
-    defns = [synset.definition() for synset in wn.synsets(word)]
-    sentences = {
-        tuple(
-            ex.replace(
-                synset.name().split(".")[0].replace("_", " "), word.replace("_", " ")
-            )
-            for ex in synset.examples()
-        ): synset.definition()
-        for synset in wn.synsets(word)
-    }
+    # defns_and_sentences = {synset.definition(): 
+    #                             [example if word in example else 
+    #                                 example.replace(
+    #                                             synset.name().split(".")[0],
+    #                                             word,
+    #                                             1
+    #                                             ) 
+    #                                 for example in synset.examples()
+    #                             ] 
+    #                         for synset in wn.synsets(word) if synset.examples()}
+    defns_and_sentences = {synset.definition(): 
+                                [example
+                                    for example in synset.examples()
+                                    if word in example
+                                ] 
+                            for synset in wn.synsets(word) if synset.examples()}
     word = word.replace("_", " ")
     # Task 1:
     if task == 1:
-        instances += generate_examples(
-            word, itertools.product(defns, sentences), task, gold=sentences
+        instances += generate_examples(word, 
+                                        itertools.product(
+                                            defns_and_sentences.keys(), 
+                                            defns_and_sentences.values()),
+                                        task, 
+                                        gold=defns_and_sentences
         )
     # Task 2:
     elif task == 2:
         instances += generate_examples(
-            word, zip(defns, sentences), task, gold=sentences
+            word, 
+            zip(
+                defns_and_sentences.keys(), 
+                defns_and_sentences.values()), 
+            task, 
+            gold=defns_and_sentences
         )
     # Task 3:
     elif task == 3:
-        instances += generate_examples(word, zip(defns, sentences), task)
+        instances += generate_examples(
+            word, 
+            zip(
+                defns_and_sentences.keys(), 
+                defns_and_sentences.values()), 
+            task)
     # Task 4:
     elif task == 4:
-        instances += generate_examples(word, zip(defns, sentences), task)
+        instances += generate_examples(
+            word, 
+            zip(
+                defns_and_sentences.keys(), 
+                defns_and_sentences.values()), 
+            task)
     return instances if instances else []
 
 
@@ -147,7 +174,6 @@ def main(task: int = -1):
         tasks = [task]
     else:
         tasks = [1, 2, 3, 4]
-
     process_nltk()
 
     with open("./data/corpora/nouns.json", "r") as fp:
