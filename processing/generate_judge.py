@@ -70,7 +70,7 @@ def main(data_file: str = ""):
     else:
         results_dir = os.path.join(script_dir, "..", "results", "task")
         for _, _, files in os.walk(results_dir):
-            for f in files:
+            for f in tqdm(files):
                 fp = os.path.join(results_dir,f)
                 prompts = generate_task(file_path=fp)
                 save(model_task=f, prompts=prompts)
