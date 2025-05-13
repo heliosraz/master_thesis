@@ -67,7 +67,7 @@ class Mistral(nn.Module):
         self.model_id = model_id
         llm_params = {k: val for k, val in kwargs.items()}
         self.llm = LLM(
-            model=model_id, device=device, max_model_len=model_len, **llm_params
+            model=model_id, device=device, max_model_len=model_len, tensor_parallel_size=2,**llm_params
         )
         self.model_id = model_id
 
