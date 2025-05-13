@@ -182,3 +182,4 @@ output.txt
 .vscode
 *.tar.gz
 thesis
+*.tex
