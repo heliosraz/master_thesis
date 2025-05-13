@@ -68,10 +68,12 @@ def main(data_file: str = ""):
         fp = os.path.join(script_dir, "..", "results", data_file)
         generate_task(fp)
     else:
-        for f in tqdm(os.listdir(os.path.join(script_dir, "..", "results", "task"))):
-            fp = os.path.join(script_dir, "..", "results", f)
-            prompts = generate_task(file_path=fp)
-            save(model_task=f, prompts=prompts)
+        results_dir = os.path.join(script_dir, "..", "results", "task")
+        for _, _, files in os.walk(results_dir):
+            for f in files:
+                fp = os.path.join(results_dir,f)
+                prompts = generate_task(file_path=fp)
+                save(model_task=f, prompts=prompts)
 
 
 if __name__ == "__main__":
