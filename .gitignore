@@ -183,3 +183,4 @@ output.txt
 *.tar.gz
 thesis
 *.tex
+*.png
