@@ -37,7 +37,7 @@ os.makedirs(output_dir, exist_ok=True)
 for root, dirs, files in os.walk(result_dir):
     for fn in tqdm(files):
         print(fn)
-        assistant = fn.split("-")[0].upper()
+        assistant = "-".join(fn.split("-")[:3]).upper()
         with open(os.path.join(result_dir, fn), "r") as f:
             data = decode(f.read(), type=list[dict])
             subset = random.sample(data, 5)
