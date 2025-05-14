@@ -7,4 +7,4 @@
 #SBATCH --partition=regular
 
 cd ~/master_thesis
-tar -czvf task.tar.gz results/task/
+tar -czvf embed.tar.gz results/embed/
