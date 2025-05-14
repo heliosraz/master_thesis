@@ -15,7 +15,7 @@ from tqdm import tqdm
 import torch
 import pandas as pd
 
-from msgspec.json import decode
+from msgspec.json import Decoder
 import time
 
 
@@ -42,43 +42,43 @@ def get_parquet(
         "response",
     ],
 ):
-    result_path = os.path.join(script_dir, "..", "results", "embed")
-    for _, _, files in os.walk(result_path):
-        rows = []
-        for fn in tqdm(files):
-            label_types = set()
-            if fn.split("-")[0] == model:
-                print(fn)
-                task = fn.split("task")[-1].split("-")[0]
-                for instance in tqdm(get_data(fn)):
-                    for embedding_type in embedding_types:
-                        if f"{embedding_type}_embedding" in instance:
-                            embedding = instance[f"{embedding_type}_embedding"]
-
-                            if embedding_type == "response":
-                                label = instance["output"][1]["content"]
-                            else:
-                                label = instance[embedding_type.split("_")[-1]][0]
-                            if type(label) == list:
-                                label = label[0]
-                            label_types.add(type(label))
-                            rows.append(
-                                [model, embedding_type, task, label, embedding, -1, -1]
-                            )  # adding a row
-    df = pd.DataFrame(
-        rows,
-        columns=[
-            "model",
-            "embedding_type",
-            "task",
-            "label",
-            "embedding",
-            "cluster",
-            "center",
-        ],
-    )
-    df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", f"{model}.parquet"))
-    return df
+    if not os.path.exists(os.path.join(script_dir, "..", "data", "cluster", f"{model}.parquet")):
+        result_path = os.path.join(script_dir, "..", "results", "embed")
+        for _, _, files in os.walk(result_path):
+            rows = []
+            for fn in tqdm(files):
+                if fn.split("-")[0] == model:
+                    print(fn)
+                    task = fn.split("task")[-1].split("-")[0]
+                    for instance in tqdm(get_data(fn)):
+                        for embedding_type in embedding_types:
+                            if f"{embedding_type}_embedding" in instance:
+                                embedding = instance[f"{embedding_type}_embedding"]
+                                word = instance["word"]
+                                if embedding_type == "response":
+                                    label = instance["output"][1]["content"]
+                                else:
+                                    label = instance[embedding_type.split("_")[-1]][0]
+                                if type(label) == list:
+                                    label = label[0]
+                                embedding = np.array(embedding, dtype=np.float32)
+                                rows.append(
+                                    [model, word, embedding_type, task, label, embedding, -1, -1]
+                                )  # adding a row
+        df = pd.DataFrame(
+            rows,
+            columns=[
+                "model",
+                "word",
+                "embedding_type",
+                "task",
+                "label",
+                "embedding",
+                "cluster",
+                "center",
+            ],
+        )
+        df.to_parquet(os.path.join(script_dir, "..", "data", "cluster", f"{model}.parquet"))
 
 
 def cluster(X, pca, kmeans):
@@ -102,9 +102,10 @@ def elbow(X):
 
 def get_data(file_name: str):
     result_path = os.path.join(script_dir, "..", "results", "embed")
+    decoder = Decoder(type=dict)
     with open(os.path.join(result_path, file_name), "r") as f:
-        data = decode(f.read(), type=list[dict])
-    return data
+        for obj in decoder.iter(f):
+            yield obj
 
 
 if __name__ == "__main__":
@@ -115,33 +116,60 @@ if __name__ == "__main__":
         "prompt",
         "response",
     ]
-    for model in ["DeepSeek", "gemma", "Llama", "Mistral"]:
+    selected_word = "car"
+    print("Getting parquet...")
+    for model in ["gemma"]:
         get_parquet(model)
     kmeans = KMeans(n_clusters=5, random_state=0)
     tsne = TSNE(n_components=2, learning_rate="auto", init="random", perplexity=3)
     pca = PCA(n_components=2)
-    for model in ["DeepSeek", "gemma", "Llama", "Mistral"]:
+    
+    for model in ["gemma"]: #["DeepSeek", "gemma", "Llama", "Mistral"]
+        print(f"Loading {model}...")
         df = pd.read_parquet(
             os.path.join(script_dir, "..", "data", "cluster", model + ".parquet")
         )
+        print(f"Clustering {model}...")
         for embedding_type in embedding_types:
             for task in ["1", "2", "3", "4"]:
-                X = df.loc[
-                    (df["embedding_type"] == embedding_type) & (df["task"] == task)
-                ]["embedding"].values
+                mask = (df["embedding_type"] == embedding_type) & (df["task"] == task)
+                # Clustering all embeddings
+                X = df.loc[mask,"embedding"].values
                 X = torch.tensor(np.vstack(X), dtype=torch.float32)
                 clustering = cluster(X, pca, kmeans)
-                df.loc((df["embedding_type"] == embedding_type) & (df["task"] == task))[
-                    "cluster"
-                ] = pd.Series(clustering.labels_)
+                # Logging Clusters
+                df.loc[mask ,"cluster"] = clustering.labels_
+                # Visualizing 500 embeddings per cluster
+                filtered = df.loc[mask]\
+                    .groupby("cluster")[['word', 'cluster', 'embedding', 'label']]\
+                    .apply(lambda x: x.sample(min(200, len(x))))
+                X_selected = df.loc[
+                    (df["embedding_type"] == embedding_type) & 
+                    (df["task"] == task) &
+                    (df["word"] == selected_word)]
+                X = pd.concat([filtered["embedding"], X_selected["embedding"]]).values
+                clustering_labels = filtered["cluster"]\
+                                        .values
+                X = torch.tensor(np.vstack(X), dtype=torch.float32)
                 tsne_X = tsne.fit_transform(X)
+                
+                displacement = len(X_selected)
                 # plot clusters
                 print("Plotting...")
                 fig = plt.figure()
                 ax = fig.add_subplot()
-                ax.scatter(tsne_X[:, 0], tsne_X[:, 1], c=clustering.labels_)
+                ax.scatter(tsne_X[:-1*displacement, 0],
+                        tsne_X[:-1*displacement, 1],
+                        c=clustering_labels,
+                        marker = "+")
+
+                # plot the selected word 
+                ax.scatter(tsne_X[-1*displacement:, 0],
+                        tsne_X[-1*displacement:, 1],
+                        c="darkorange")
+                
                 ax.set_title(f"Clusters for {embedding_type} - {model} - Task {task}")
-                # fig.show()
+                fig.show()
 
                 # print("Saving plot...")
                 plt.savefig(
