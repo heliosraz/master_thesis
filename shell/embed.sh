@@ -10,7 +10,7 @@
 
 source ~/miniconda3/bin/activate thesis
 if [ -n "$1" ] && [ -n "$2" ]; then
-    python ~/master_thesis/experiments/exp2.py $1 $2
+    python ~/master_thesis/experiments/embed.py $1 $2
 else
-    python ~/master_thesis/experiments/exp2.py
+    python ~/master_thesis/experiments/embed.py
 fi
