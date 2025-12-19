@@ -21,6 +21,7 @@ def load_data(task: int):
     data = []
     with open(data_path, "r") as fp:
         data = json.load(fp)
+    print(len(data))
     return data
 
 
@@ -86,9 +87,9 @@ if __name__ == "__main__":
     for arch in arches:
         for task in tasks:
             print(f"Running architecture {arch} on task {task}")
-            model = architectures[arch]()
+            # model = architectures[arch]()
             data = load_data(task)
-            batch_size = 32
-            print("Starting inference...")
-            results = run(model, data, task, batch_size=batch_size)
-            checkpoint(model, task, results)
+            # batch_size = 32
+            # print("Starting inference...")
+            # results = run(model, data, task, batch_size=batch_size)
+            # checkpoint(model, task, results)

@@ -10,6 +10,7 @@ from sys import argv, path
 import pandas as pd
 from msgspec.json import decode
 from typing import List, Set
+import scipy
 script_dir = os.path.dirname(os.path.abspath(__file__))
 path.append(os.path.join(script_dir, ".."))
 judges = [
@@ -37,12 +38,12 @@ def find_score(response: str):
     return rating
 
 
-def evaluate(file_name: str = "", test="2"):
+def evaluate(file_name: str = "", test="3"):
     """_summary_
 
     Args:
-        file_name (str, optional): _description_. Defaults to "".
-        test (str, optional): _description_. Defaults to "2".
+        file_name (str, optional): if specified, the evaluation is only done on one file.
+        test (str, optional): defines which iteration of the judgement data to use.
 
     Returns:
         results (dict[int, dict[str, dict[str, dict]]]): a dictionary split up by {task {judge: {assistant: {word}}}}
@@ -64,8 +65,9 @@ def evaluate(file_name: str = "", test="2"):
         for task in range(1, 5)
     }
     keys = {1:["definition", "sentence"], 2:["sentence"], 3:["definition"], 4:["sentence"]}
+    total = {judge: 0 for judge in judges}
     fails = {judge: 0 for judge in judges}
-    result_path = os.path.join(script_dir, "..", "results", "judgment", test)
+    result_path = os.path.join(script_dir, "..", "results", "judgement", test, file_name)
     for root, dirs, files in os.walk(result_path):
         for fp in tqdm(files):
             # if not fp.endswith(".json"):
@@ -82,19 +84,28 @@ def evaluate(file_name: str = "", test="2"):
                     if word not in record[task][judge][assistant]:
                         record[task][judge][assistant][word] = {"total": 0,
                                                                 "count": 0}
+                    total[judge] += 1
                     if not rating:
                         fail_count += 1
                         fails[judge] += 1
                     else:
-                        key = (instance[p] for p in keys[task])
+                        key = tuple([instance[p] for p in keys[task]])
                         record[task][judge][assistant][word][key] = int(rating) / 10
                         record[task][judge][assistant][word]["count"] = record[task][judge][assistant][word]["count"] + 1
                         record[task][judge][assistant][word]["total"] = record[task][judge][assistant][word]["total"] + int(rating) / 10
 
     # print(record)
     print(fails)
+    print(total)
+    print({judge: fails[judge]/total[judge] for judge in fails})
     return record
 
+def statistics(results: dict[int, dict[str, dict[str, dict]]]) -> pd.DataFrame:
+    stats = {(task, judge, assistant): values
+        for task, judges in results.items()
+        for judge, assistants in judges.items()
+        for assistant, values in assistants.items()}
+    return pd.DataFrame.from_dict(stats, orient="index")
 
 def plot_1(
     results: dict[int, dict[str, dict[str, dict]]],
@@ -126,7 +137,7 @@ def plot_1(
                 x = [score["count"] for score in results[task][judge][assistant].values()]
                 y = [score["total"] for score in results[task][judge][assistant].values()]
                 if x and y:
-                    limit = max(x + y)
+                    limit = 4480
                     ax.plot(
                         [0, limit],
                         [0, limit],
@@ -142,12 +153,12 @@ def plot_1(
                         s=1,
                         label="-".join(assistant.split("-")[:3]).capitalize(),
                     )
-                    m, b, r_value, p_value, std_err = scipy.stats.linregress(x, y)(x, y, 1)
+                    m, b, r_value, p_value, std_err = scipy.stats.linregress(x, y)
 
                     ax.plot(
-                        x,
-                        [m * coord + b for coord in x],
-                        "--",
+                        np.arange(limit),
+                        [m * coord + b for coord in np.arange(limit)],
+                        "-",
                         color=color_map[assistant],
                         linewidth=1.0,
                     )
@@ -155,10 +166,10 @@ def plot_1(
                     if row == len(results[task]) - 1:
                         ax.set_xlabel(
                             f"Judge:\n{'-'.join(judge.split('-')[:3]).capitalize()}",
-                            fontsize=9,
+                            fontsize=12,
                         )
                     if col == 0:
-                        ax.set_ylabel(f"Task:\n{task}", fontsize=9)
+                        ax.set_ylabel(f"Task:\n{task}", fontsize=12)
 
                     fit[task][judge][assistant].update({"m": m, "b": b, "r_value": r_value, "p_value": p_value, "std_err": std_err})
                     table_lines.append((assistant, m, b))
@@ -168,7 +179,7 @@ def plot_1(
                 label = f"$m$={m:.2f}, $b$={b:.2f}"
                 ax.text(0.02, 0.98 - i*0.12, label,
                         transform=ax.transAxes,
-                        fontsize=8, va='top', color=color_map[assistant])
+                        fontsize=12, va='top', color=color_map[assistant])
 
     all_handles_labels = []
     for row in range(len(results)):
@@ -184,7 +195,16 @@ def plot_1(
         fontsize=12,
         markerscale=10,
     )
-    plt.show()
+    # plt.show()
+    fig = plt.gcf()
+    fig.set_size_inches(15, 10)
+    plt.savefig(os.path.join(
+        script_dir,
+        "..",
+        "results",
+        'judgement',
+        "plot1.png"
+    ), dpi = 200)
     return fit
 
 
@@ -218,7 +238,7 @@ def plot_2(
                 x = [score["count"] for score in results[task][judge][assistant].values()]
                 y = [score["total"] for score in results[task][judge][assistant].values()]
                 if x and y:
-                    limit = max(x + y)
+                    limit = 4480
                     ax.plot(
                         [0, limit],
                         [0, limit],
@@ -234,12 +254,12 @@ def plot_2(
                         s=1,
                         label=f"Task {task}" if (row == 0 and col == 0) else "",
                     )
-                    m, b, r_value, p_value, std_err = scipy.stats.linregress(x, y)(x, y, 1)
+                    m, b, r_value, p_value, std_err = scipy.stats.linregress(x, y)
 
                     ax.plot(
-                        x,
-                        [m * coord + b for coord in x],
-                        "--",
+                        np.arange(limit),
+                        [m * coord + b for coord in np.arange(limit)],
+                        "-",
                         color=color_map[task],
                         linewidth=1.0,
                     )
@@ -247,21 +267,21 @@ def plot_2(
                     if row == len(assistants) - 1:
                         ax.set_xlabel(
                             f"Judge:\n{'-'.join(judge.split('-')[:3]).capitalize()}",
-                            fontsize=9,
+                            fontsize=12,
                         )
                     if col == 0:
                         ax.set_ylabel(
                             f"Assistant:\n{'-'.join(assistant.split('-')[:3]).capitalize()}",
-                            fontsize=9,
+                            fontsize=12,
                         )
-                    fit[task][judge][assistant].update({"m": m, "b": b, "r_value": r_value, "p_value": p_value, "std_err": std_err})
+                    fit[assistant][judge][task].update({"m": m, "b": b, "r_value": r_value, "p_value": p_value, "std_err": std_err})
                     table_lines.append((task, m, b))
             for i, line in enumerate(table_lines):
                 task, m, b = line
                 label = f"$m$={m:.2f}, $b$={b:.2f}"
                 ax.text(0.02, 0.98 - i*0.12, label,
                         transform=ax.transAxes,
-                        fontsize=8, va='top', color=color_map[task])
+                        fontsize=12, va='top', color=color_map[task])
 
     all_handles_labels = []
     for row in range(len(results)):
@@ -277,13 +297,22 @@ def plot_2(
         fontsize=12,
         markerscale=10,
     )
-    plt.show()
+    # plt.show()
+    fig = plt.gcf()
+    fig.set_size_inches(15, 10)
+    plt.savefig(os.path.join(
+        script_dir,
+        "..",
+        "results",
+        'judgement',
+        "plot2.png"
+    ), dpi = 200)
     return fit
 
 
 def cat_plot(
     results: dict[int, dict[str, dict[str, dict]]],
-    selected: Set[str] = {"book", "system"},
+    selected_words: Set[str] = {"organization", "system", "administration"},
     ):
     """_summary_
 
@@ -303,82 +332,96 @@ def cat_plot(
                         for assistant, words in assistants.items() 
                         for word, keys in words.items()
                         for key, score in keys.items()
-                        if key not in {"count", "total"}
+                        if key not in {"count", "total"} and assistant != "gemma-3-12b-it" and score >= 0
                         ]
     results = pd.DataFrame(results, columns=["task", "judge", "assistant", "word", "key", "score"])
     words = results["word"].unique()
     greys = iter(sns.color_palette("Greys", len(words)))
-    palette = sns.color_palette("hls", len(words))
-    pal = {word: palette[i] if word in selected else next(greys) for i, word in enumerate(words)}
-
+    palette = sns.color_palette("tab10", len(words))
+    pal = {word: palette[i] if word in selected_words else next(greys) for i, word in enumerate(words)}
     g = sns.FacetGrid(results, col="assistant")
-    print("Plotting violin plot...")
-    g.map_dataframe(sns.violinplot, "task", "score", order = ["1","2","3","4"], color=".9", inner=None)
-    print("Plotting swarm plot...")
-    g.map_dataframe(sns.swarmplot,  "task", "score", hue="word", palette=pal, order = ["1","2","3","4"], data = results)
+    g.map_dataframe(sns.boxplot, "task", "score", order = ["1","2","3","4"], fill=False, dodge=True)
+    print("Plotting violin plots...")
+    for word in selected_words:
+        filtered = results[results["word"].isin({word})]
+        for ax, (name, subdata) in zip(g.axes.flat, filtered.groupby("assistant")):
+            sns.violinplot(x="task", y="score", order = ["1","2","3","4"], hue="word", palette=pal, inner=None, data=subdata, ax=ax, alpha=0.3)
+            ax.legend_.remove()
+        # print("Plotting strip plot...")
+        # g.map_dataframe(sns.scatterplot, "task", "score", data=df_counts, hue="word", palette=pal, alpha=0.3, size="count")
+    handles, labels = g.axes.flat[0].get_legend_handles_labels()
+    g.add_legend({label: handle for label, handle in zip(labels, handles)}, title="Word")
     print("Rendering...")
-    plt.show()
+    # plt.show()
+    plt.savefig(os.path.join(
+        script_dir, 
+        "..",
+        "results",
+        "judgement",
+        "cat_plot.png"
+    ))
     
 def annot_eval():
     annotation_path = os.path.join(script_dir, "..", "data", "annotation")
-    judgment_path = os.path.join(script_dir, "..", "results", "judgment", "2")
+    judgement_path = os.path.join(script_dir, "..", "results", "judgement", "2")
     record = {}
-    for root, _, files in os.walk(judgment_path):
+    for root, _, files in os.walk(judgement_path):
         for fn in tqdm(files):
             with open(os.path.join(root, fn), "r") as f:
                 data = decode(f.read(), type=list[dict])
                 print("Loaded", fn)
                 for instance in tqdm(data):
                     response = instance["messages"][1]["content"]
-                    judgment = instance["response"][-1]["content"]
+                    judgement = instance["response"][-1]["content"]
                     assistant = instance["assistant"]
-                    score = find_score(judgment) if find_score(judgment) else -1
+                    score = find_score(judgement) if find_score(judgement) else -1
                     judge = instance["judge"]
                     if response not in record:
                         record[response] = []
                     record[response].append({"score": score,
                                             "judge": judge,
                                             "assistant": assistant,
-                                            "judgment": judgment})
+                                            "judgement": judgement})
     result = []
     for root, _, files in os.walk(annotation_path):
         for fn in tqdm(files):
-            with open(os.path.join(root, fn), "r") as f:
-                data = decode(f.read(), type=list[dict])
-                for instance in tqdm(data):
-                    response = instance["data"]["messages"]\
-                            .split("<p>")[2][11:-4]
-                    score = [r["value"].values() for r in instance["annotations"][0]["result"]]
-                    judge = fn
-                    curr = {"response": response, "human_score": str(score)}
-                    for judge in record[response]:
-                        result.append({**curr, **judge})
+            if fn in {"1.json", "2.json", "3.json"}:
+                with open(os.path.join(root, fn), "r") as f:
+                    data = decode(f.read(), type=list[dict])
+                    for instance in tqdm(data):
+                        response = instance["data"]["messages"]\
+                                .split("<p>")[2][11:-4]
+                        score = [r["value"].values() for r in instance["annotations"][0]["result"]]
+                        judge = fn
+                        curr = {"response": response, "human_score": str(score)}
+                        for judge in record[response]:
+                            result.append({**curr, **judge})
     with open(os.path.join(annotation_path, "annotation.json"), "w") as f:
         json.dump(result, f)
         
 def judge_annot():
     annotation_path = os.path.join(script_dir, "..", "data", "annotation")
-    judgment_path = os.path.join(script_dir, "..", "results", "judgment", "2")
+    judgement_path = os.path.join(script_dir, "..", "results", "judgement", "2")
     result = []
-    for root, _, files in os.walk(judgment_path):
+    for root, _, files in os.walk(judgement_path):
         for fn in tqdm(files):
             with open(os.path.join(root, fn), "r") as f:
                 data = decode(f.read(), type=list[dict])
                 print("Loaded", fn)
                 for instance in tqdm(data):
                     response = instance["messages"][1]["content"]
-                    judgment = instance["response"][-1]["content"]
+                    judgement = instance["response"][-1]["content"]
                     assistant = instance["assistant"]
-                    score = find_score(judgment) if find_score(judgment) else "-1"
+                    score = find_score(judgement) if find_score(judgement) else -1
                     judge = instance["judge"]
                     if int(score) < 4:
                         result.append({"score": score,
                                             "judge": judge,
                                             "assistant": assistant,
-                                            "judgment": judgment,
+                                            "judgement": judgement,
                                             "response": response})
     print(len(result))
-    with open(os.path.join(annotation_path, "judgments.json"), "w") as f:
+    with open(os.path.join(annotation_path, "judgements.json"), "w") as f:
         json.dump(result, f, indent=4)
     
 
@@ -388,7 +431,7 @@ def word_count(data:str):
     words = word_tokenize(data.lower())
     return Counter(words)
 
-def jist(data_root: str = "results/judgment/2"):
+def jist(data_root: str = "results/judgement/2"):
     path = os.path.join(script_dir, "..", data_root)
     results = {judge: Counter() for judge in judges}
     for root, _, files in os.walk(path):
@@ -427,16 +470,11 @@ if __name__ == "__main__":
     #     for task in range(1, 5)
     # }
         
-    cat_plot(results)
-    # task_lines = {}
-    # assistant_lines = {}
+    # cat_plot(results)
 
-    # # assistant_lines.update(plot_1(results))
-    # # assistant_lines.update(
-    # #     plot_1(results, assistants=["gemma-3-4b-it", "gemma-3-12b-it"])
-    # # )
+    # statistics(plot_1(results)).to_latex("plot1.tex")
+    # # plot_1(results, assistants=["gemma-3-4b-it", "gemma-3-12b-it"])
 
-    # # plot_2(results)
-    # plot_2(results, tasks=[1,2,3,4])
+    # statistics(plot_2(results, tasks=[1,2,3,4])).to_latex("plot2.tex")
     
     # jist()

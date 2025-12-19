@@ -16,7 +16,7 @@ os.makedirs(os.path.join(script_dir, "..", "results", "judgement"), exist_ok=Tru
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
-architectures = [Llama, Gemma, Mistral, DeepSeek]  # distill version
+architectures = [Llama, Gemma, Mistral, DeepSeek]
 
 
 def load_data(file_name: str):
