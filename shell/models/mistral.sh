@@ -1,14 +1,5 @@
-#!/bin/bash
-
-#SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=4 
-#SBATCH --mem-per-cpu=16384
-#SBATCH --partition=regular
-
-source ~/miniconda3/bin/activate thesis
-
-if [ -n "$1" ]; then
-    python3 ~/master_thesis/experiments/exp1.py 2 $1
-else
-    python3 ~/master_thesis/experiments/exp1.py 2
-fi
+vllm serve mistralai/Mistral-7B-Instruct-v0.3 --max_num_batched_tokens 7376 \
+                        --max_model_len 7376 \
+                        --enforce-eager \
+                        --structured-outputs-config.backend guidance \
+                        --dtype float32
