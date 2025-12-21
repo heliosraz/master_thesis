@@ -68,7 +68,7 @@ async def process_batch(batch, system_prompt):
 def main(instances: List[dict], task: int, batch_size: int = 128):
     results = []
     system_prompt = load_system_prompt(task)
-    for i in range(0, len(instances), batch_size=32):
+    for i in range(0, len(instances), batch_size):
         batch = instances[i:i+batch_size]
         results.extend(asyncio.run(process_batch(batch, system_prompt)))
     return results
@@ -79,8 +79,7 @@ if __name__ == "__main__":
         task = sys.argv[2]
     else:
         raise ValueError("Desired prompt id doesn't exist.")
-    data = load_data(task)
-    instances = list(data.items())
+    instances = load_data(task)
     
     results = main(instances, task)
     with open("results/predictions.json", "a") as fp:
