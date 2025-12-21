@@ -25,10 +25,10 @@ def format_task(example: DataInstance, task: int):
     if task == 1:
         prompt = [
             (
-                f'Question: How well does "{example.definition}" describe "{example.word}" in this sentence? \n'
+                f'Question: How well does "{example.definition}" define "{example.word}" in this sentence? \n'
                 f"Sentence: {example.example}"
             ),
-            "Question: Can you provide justification for your answer?",
+            "Question: Please provide justification for your answer?",
         ]
         # ranking the senses for this word
         # how well does this definition fit the word in this sentence?
@@ -38,21 +38,12 @@ def format_task(example: DataInstance, task: int):
         ]
     elif task == 3:
         prompt = [
-            (
-                f'Question: What words in "{example.definition}" are the key words in defining "{example.word}"'
-            ),
+            (f'Question: What words in "{example.definition}" are key words for defining "{example.word}"'),
             (f"Question: How do each of these keywords contribute to the definition?"),
         ]
     elif task == 4:
         prompt = [
             f'Instruction: Replace "{example.word}" with a word that matches the meaning the closest in the sentence: {example.example}'
-        ]
-    elif task == 5:
-        prompt = [
-            (
-                f"Question: A dog means an informal term for a man. An example of the sentence is:\nyou lucky dog.\n"
-                f"A {example.word} means {example.definition}. An example of the sentence is: "
-            )
         ]
     return prompt
 
