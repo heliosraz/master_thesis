@@ -66,7 +66,7 @@ async def process_batch(batch, system_prompt):
     
     return batch_results
 
-def main(instances: List[dict], task: int, batch_size: int = 128):
+def main(instances: List[dict], task: int, batch_size: int = 256):
     results = []
     system_prompt = load_system_prompt(task)
     for i in tqdm(range(0, len(instances), batch_size)):
