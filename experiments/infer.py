@@ -27,8 +27,6 @@ client = AsyncOpenAI(
     api_key="EMPTY",
     base_url=f"http://localhost:800{sys.argv[1]}/v1"
 )
-model = model_ids[sys.argv[1]]
-task = sys.argv[2]
 status = 0
 
 def load_data(task: int):
@@ -77,14 +75,14 @@ def main(instances: List[dict], task: int, batch_size: int = 128):
 
 if __name__ == "__main__":
     if len(sys.argv)>1:
-        data = load_data(sys.argv[2])
-        prompt = load_system_prompt("data/prompts/system_prompt.jsonl", sys.argv[2])
+        model = model_ids[sys.argv[1]]
+        task = sys.argv[2]
     else:
-        data = load_data(1)
-        prompt = load_system_prompt("data/prompts/system_prompt.jsonl", "1")
+        raise ValueError("Desired prompt id doesn't exist.")
+    data = load_data(task)
     instances = list(data.items())
     
-    results = main(instances, sys.argv[1])
+    results = main(instances, task)
     with open("results/predictions.json", "a") as fp:
         for r in tqdm(results):
             json.dump(r, fp)
