@@ -6,7 +6,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(script_dir, ".."))
 
 from tqdm.asyncio import tqdm
-from openai import OpenAI
+from openai import OpenAI, BadRequestError
 from pydantic import BaseModel, Field
 from utils import load_system_prompt, load_data
 
@@ -48,6 +48,7 @@ async def run_async(instance, system_prompt):
             model=model,
             messages=messages
         )
+        response = response.choices[0].message.content
         messages.append({"role": "assistant", "content": response})
     instance["output"] = response
     if "gold" not in instance:
@@ -68,7 +69,7 @@ async def process_batch(batch, system_prompt):
 def main(instances: List[dict], task: int, batch_size: int = 128):
     results = []
     system_prompt = load_system_prompt(task)
-    for i in range(0, len(instances), batch_size):
+    for i in tqdm(range(0, len(instances), batch_size)):
         batch = instances[i:i+batch_size]
         results.extend(asyncio.run(process_batch(batch, system_prompt)))
     return results
