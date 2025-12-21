@@ -1,21 +1,22 @@
-from tqdm.asyncio import tqdm
-from openai import OpenAI
-from pydantic import BaseModel, Field
-from utils.data_processing import load_system, load_data, prompt_template
-
 import sys
 import os
 import json
 from typing import List
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(script_dir, ".."))
+
+from tqdm.asyncio import tqdm
+from openai import OpenAI
+from pydantic import BaseModel, Field
+from utils import load_system_prompt, load_data
+
+
 
 model_ids = {"0":"deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
              "1":"google/gemma-3-4b-it",
              "2":"meta-llama/Llama-3.2-3B-Instruct",
              "3":"mistralai/Mistral-7B-Instruct-v0.3"}
 
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(script_dir, ".."))
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.makedirs(os.path.join(script_dir, "..", "results", "task"), exist_ok=True)
 
@@ -68,7 +69,7 @@ async def process_batch(batch, system_prompt):
 
 def main(instances: List[dict], task: int, batch_size: int = 128):
     results = []
-    system_prompt = load_system(task)
+    system_prompt = load_system_prompt(task)
     for i in range(0, len(instances), batch_size=32):
         batch = instances[i:i+batch_size]
         results.extend(asyncio.run(process_batch(batch, system_prompt)))
@@ -77,10 +78,10 @@ def main(instances: List[dict], task: int, batch_size: int = 128):
 if __name__ == "__main__":
     if len(sys.argv)>1:
         data = load_data(sys.argv[2])
-        prompt = load_system("data/prompts/system_prompt.jsonl", sys.argv[2])
+        prompt = load_system_prompt("data/prompts/system_prompt.jsonl", sys.argv[2])
     else:
         data = load_data(1)
-        prompt = load_system("data/prompts/system_prompt.jsonl", "1")
+        prompt = load_system_prompt("data/prompts/system_prompt.jsonl", "1")
     instances = list(data.items())
     
     results = main(instances, sys.argv[1])
