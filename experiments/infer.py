@@ -27,6 +27,7 @@ client = AsyncOpenAI(
     api_key="EMPTY",
     base_url=f"http://localhost:800{sys.argv[1]}/v1"
 )
+print(f"http://localhost:800{sys.argv[1]}/v1")
 status = 0
 
 def load_data(task: int):
@@ -66,12 +67,12 @@ async def process_batch(batch, system_prompt):
     
     return batch_results
 
-def main(instances: List[dict], task: int, batch_size: int = 256):
+async def main(instances: List[dict], task: int, batch_size: int = 256):
     results = []
     system_prompt = load_system_prompt(task)
     for i in tqdm(range(0, len(instances), batch_size)):
         batch = instances[i:i+batch_size]
-        results.extend(asyncio.run(process_batch(batch, system_prompt)))
+        results.extend(await process_batch(batch, system_prompt))
     return results
 
 if __name__ == "__main__":
@@ -82,7 +83,7 @@ if __name__ == "__main__":
         raise ValueError("Desired prompt id doesn't exist.")
     instances = load_data(task)
     
-    results = main(instances, task)
+    results = asyncio.run(main(instances, task))
     with open("results/predictions.json", "a") as fp:
         for r in tqdm(results):
             json.dump(r, fp)
