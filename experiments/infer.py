@@ -1,12 +1,17 @@
 from tqdm.asyncio import tqdm
 from openai import OpenAI
 from pydantic import BaseModel, Field
-from data_processing import load_system, load_data, prompt_template
+from utils.data_processing import load_system, load_data, prompt_template
 
 import sys
 import os
 import json
 from typing import List
+
+model_ids = {"0":"deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+             "1":"google/gemma-3-4b-it",
+             "2":"meta-llama/Llama-3.2-3B-Instruct",
+             "3":"mistralai/Mistral-7B-Instruct-v0.3"}
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,6 +19,16 @@ sys.path.append(os.path.join(script_dir, ".."))
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.makedirs(os.path.join(script_dir, "..", "results", "task"), exist_ok=True)
 
+import asyncio
+from openai import AsyncOpenAI
+
+client = AsyncOpenAI(
+    api_key="EMPTY",
+    base_url=f"http://localhost:800{sys.argv[1]}/v1"
+)
+model = model_ids[sys.argv[1]]
+task = sys.argv[2]
+status = 0
 
 def load_data(task: int):
     data_path = os.path.join(script_dir, "..", "data", "tasks", f"task{task}.json")
@@ -21,83 +36,24 @@ def load_data(task: int):
     with open(data_path, "r") as fp:
         data = json.load(fp)
     return data
+        
 
-
-def checkpoint(model: nn.Module, i: int, results: List[dict]):
-    data_path = os.path.join(
-        script_dir, "..", "results", "task", f"{str(model)}-task{i}.json"
-    )
-    with open(data_path, "w") as fp:
-        json.dump(results, fp, indent=4)
-
-
-def run(model: nn.Module, data: List[dict], task: int, batch_size: int = 128):
-    results = []
-    iteration = 0
-    # use_tqdm = batch_size > 1
-    use_tqdm = False
-    for start in tqdm(range(0, len(data), batch_size), desc="Processing batches"):
-        end = start + batch_size
-        instances = data[start:end]
-        responses = model.forward(
-            [instance["prompt"] for instance in instances], use_tqdm=use_tqdm
+async def run_async(instance, system_prompt):
+    prompt = instance["prompt"]
+    messages = [
+                {"role": "system", "content": system_prompt},
+            ]
+    for message in prompt:
+        messages.append({"role": "user", "content": message})
+        response = await client.chat.completions.create(
+            model=model,
+            messages=messages
         )
-        for response, instance in zip(responses, instances):
-            if "gold" in instance:
-                results.append(
-                    {
-                        "task": task,
-                        "word": instance["word"],
-                        "definition": instance["definition"],
-                        "gold": instance["gold"],
-                        "sentence": instance["sentence"],
-                        "prompt": instance["prompt"],
-                        "output": response,
-                    }
-                )
-            else:
-                results.append(
-                    {
-                        "task": task,
-                        "word": instance["word"],
-                        "definition": instance["definition"],
-                        "gold": "",
-                        "sentence": instance["sentence"],
-                        "prompt": instance["prompt"],
-                        "output": response,
-                    }
-                )
-        if iteration % 10 == 9:
-            checkpoint(model, task, results)
-        iteration += 1
-    return results
-
-import asyncio
-from openai import AsyncOpenAI
-
-client = AsyncOpenAI(
-    api_key="EMPTY",
-    base_url="http://localhost:8000/v1"
-)
-model = sys.argv[1]
-status = 0
-
-async def run_async(instance, system_prompt, schema, model):
-    prompt = prompt_template(instance[1]['precontext'],
-                    instance[1]['sentence'],
-                    instance[1]['ending'])
-    
-    response = await client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
-        ],
-        response_format=schema
-    )
-    
-    result = json.loads(response.choices[0].message.content)
-    return {"id": instance[0], "prediction": result["score"]}
+        messages.append({"role": "assistant", "content": response})
+    instance["output"] = response
+    if "gold" not in instance:
+        instance["gold"] = ""
+    return instance
 
 async def process_batch(batch, system_prompt):
     tasks = [run_async(inst, system_prompt) for inst in batch]
