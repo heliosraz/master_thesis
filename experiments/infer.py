@@ -58,9 +58,9 @@ async def run_async(instance, system_prompt):
             model=model,
             messages=messages
         )
-        response = response.choices[0].message.content
-        messages.append({"role": "assistant", "content": response})
-    instance["output"] = response
+        messages.append(response.choices[0].message)
+    instance["output"] = response.choices[0].message.content
+    print(response.choices[0].message.content)
     if "gold" not in instance:
         instance["gold"] = ""
     return instance
