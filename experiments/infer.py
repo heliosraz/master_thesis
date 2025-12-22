@@ -36,6 +36,15 @@ def load_data(task: int):
     with open(data_path, "r") as fp:
         data = json.load(fp)
     return data
+
+def checkpoint(results: List[dict]):
+    mname = model_ids[model].split("/")[-1].split("-")[0]
+    mname[0] = mname[0].lower()
+    data_path = os.path.join(
+        script_dir, "..", "results", "task", f"{mname}-task{task}.json"
+    )
+    with open(data_path, "a") as fp:
+        json.dump(results, fp, indent=4)
         
 
 async def run_async(instance, system_prompt):
@@ -68,12 +77,10 @@ async def process_batch(batch, system_prompt):
     return batch_results
 
 async def main(instances: List[dict], task: int, batch_size: int = 256):
-    results = []
     system_prompt = load_system_prompt(task)
     for i in tqdm(range(0, len(instances), batch_size)):
         batch = instances[i:i+batch_size]
-        results.extend(await process_batch(batch, system_prompt))
-    return results
+        checkpoint(await process_batch(batch, system_prompt))
 
 if __name__ == "__main__":
     if len(sys.argv)>1:
@@ -84,7 +91,7 @@ if __name__ == "__main__":
     instances = load_data(task)
     
     results = asyncio.run(main(instances, task))
-    with open("results/predictions.json", "a") as fp:
-        for r in tqdm(results):
-            json.dump(r, fp)
-            fp.write("\n")
+    # with open("results/predictions.json", "a") as fp:
+    #     for r in tqdm(results):
+    #         json.dump(r, fp)
+    #         fp.write("\n")
