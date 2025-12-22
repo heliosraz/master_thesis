@@ -38,8 +38,8 @@ def load_data(task: int):
     return data
 
 def checkpoint(results: List[dict]):
-    mname = model_ids[model].split("/")[-1].split("-")[0]
-    mname[0] = mname[0].lower()
+    mname = model.split("/")[-1].split("-")[0]
+    mname = mname.lower()
     data_path = os.path.join(
         script_dir, "..", "results", "task", f"{mname}-task{task}.json"
     )
